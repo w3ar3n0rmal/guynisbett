@@ -432,8 +432,10 @@ let navRects = [], hoveredNav = -1, revealed = false;
 
 /* frosted-glass wordmark tunables — poke live in the console:
    GLASS.down = blur strength (bigger = blurrier), GLASS.tint = white lift
-   inside the letters, GLASS.alpha = overall wordmark opacity */
-const GLASS = window.GLASS = { down: 14, tint: 0.22, alpha: 0.9 };
+   inside the letters, GLASS.alpha = glass layer opacity,
+   GLASS.diff = difference-inversion underlay (0..1) for contrast on any
+   background. The three combine: difference first, glass over it. */
+const GLASS = window.GLASS = { down: 14, tint: 0.16, alpha: 0.78, diff: 0.55 };
 const glassCanvas = document.createElement('canvas');
 const blurScratch = document.createElement('canvas');
 
@@ -478,6 +480,20 @@ function paintScene(idx, cssW, cssH, dpr) {
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
+
+  /* --- difference underlay: inverts whatever is behind the glyphs, so the
+     mark keeps contrast on light and dark grounds alike --- */
+  if (GLASS.diff > 0) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'difference';
+    ctx.globalAlpha = GLASS.diff;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '700 ' + L.titleSize + 'px ' + FONT;
+    ctx.fillText('GUY NISBETT', L.cx, L.titleY);
+    ctx.font = '700 ' + L.subSize + 'px ' + FONT;
+    ctx.fillText('FILM DIRECTOR', L.cx, L.subY);
+    ctx.restore();
+  }
 
   /* --- frosted-glass wordmark: the photo, blurred, seen through the letters --- */
   const gc = glassCanvas;
