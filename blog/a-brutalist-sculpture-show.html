@@ -1,77 +1,264 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI - A Brutalist Sculpture Show — GUY NISBETT</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>A Brutalist Sculpture Show — GUY NISBETT</title>
 <link rel="stylesheet" href="https://use.typekit.net/dyw6xci.css">
 <style>
-  /* transcribed from the live Squarespace blog at a 1702px viewport:
-     ground #A8A6A1, white text; post column 46vw centred, title 12px bold,
-     date 14px, body 12px/1.3; media 48vw; index rows: square image 36.8vw
-     left, text right, title 2.983vw */
-  :root { --grey-bright:#a8a6a1; --ink:#38383b; --paper:#fff; --dim:#dfe0e1;
-          --font:"aktiv-grotesk","Helvetica Neue",Helvetica,Arial,sans-serif; }
-  body { margin:0; background:var(--grey-bright); color:#fff; font-family:var(--font);
-         -webkit-font-smoothing:antialiased; }
-  header.site { padding:24px 4vw; display:flex; justify-content:space-between; align-items:center; }
-  header.site .mark { font-weight:700; font-size:15px; letter-spacing:0.14em; color:#fff; text-decoration:none; }
-  header.site nav a { margin-left:20px; font-size:11px; font-weight:700; letter-spacing:0.18em;
-                      color:#fff; text-decoration:none; opacity:0.85; }
-  header.site nav a:hover { opacity:1; }
+  @font-face {
+    font-family: 'Archivo Narrow';
+    font-style: normal;
+    font-weight: 600;
+    src: url(about-assets/archivo-narrow-600.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'Nunito';
+    font-style: normal;
+    font-weight: 400;
+    src: url(about-assets/nunito-400.woff2) format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: url(about-assets/jetbrains-mono-400.woff2) format('woff2');
+  }
+  :root {
+    --ink-bg: #1c1f21;
+    --ink-2: #23272a;
+    --paper: #f4f1ea;
+    --paper-dim: #c7c4bc;
+    --mute: #8e9497;
+    --rule: rgba(244, 241, 234, 0.13);
+    --stone: #c9b49a;
+    --hover: #c0562f;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --narrow: 'Archivo Narrow', 'Arial Narrow', sans-serif;
+    --body: 'Nunito', system-ui, sans-serif;
+    --times: 'Times New Roman', Times, serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--ink-bg);
+    color: var(--paper);
+    font-family: var(--body);
+    display: flex;
+    flex-direction: column;
+  }
+  .mono {
+    font: 400 11px var(--mono);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  header {
+    padding: 30px 90px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-shrink: 0;
+  }
+  .wm {
+    font: 700 15px "aktiv-grotesk", "Helvetica Neue", sans-serif;
+    letter-spacing: 0.14em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .back {
+    font: 400 11px var(--mono);
+    letter-spacing: 0.24em;
+    color: var(--paper-dim);
+    text-decoration: none;
+    padding: 10px 6px;
+    margin: -10px -6px;
+    transition: color 0.2s ease;
+  }
+  .back:hover { color: var(--hover); }
 
-  /* ---------- post ---------- */
-  main.post { width:min(46vw,88%); margin:0 auto; padding:2vw 0 6vw; }
-  .meta { font-size:14px; color:#fff; margin:0 0 26px; }
-  h1 { color:#fff; font-size:max(13px,0.703vw); font-weight:700; line-height:1.1; margin:0 0 26px; }
-  article p, article li { font-size:max(13px,0.703vw); line-height:1.3; color:#fff; }
-  article a { color:#fff; }
-  article h2, article h3, article h4 { color:#fff; font-size:max(13px,0.703vw); margin:2em 0 1em; }
-  article em { opacity:0.92; }
-  article img { width:min(48vw,100%); max-width:none; height:auto; display:block; margin:2vw auto; }
-  .videowrap { position:relative; width:min(48vw,100%); aspect-ratio:16/9; background:#000; margin:2vw auto; }
-  .videowrap iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(48vw,100%); margin:2vw auto; }
-  .gallery img { width:100%; aspect-ratio:1/1; object-fit:cover; margin:0; }
-  @media (max-width:900px) { main.post { width:88%; }
-    article img, .videowrap, .gallery { width:100%; } }
-
-  /* ---------- index rows ---------- */
-  main.index { padding:2vw 4vw 6vw; }
-  .row { display:flex; gap:5.5vw; margin-bottom:5.9vw; text-decoration:none; color:#fff; }
-  .row img { flex:0 0 36.8vw; width:36.8vw; height:36.8vw; object-fit:cover; display:block; background:#000; }
-  .row .rtext { flex:1; display:flex; flex-direction:column; justify-content:center; min-width:0; }
-  .row .rmeta { font-size:14px; margin:0 0 12px; }
-  .row h2 { font-size:max(24px,2.983vw); font-weight:700; line-height:1.1; margin:0 0 18px; color:#fff; }
-  .row p { font-size:max(13px,0.703vw); line-height:1.3; margin:0 0 14px; }
-  .row .more { font-size:max(13px,0.703vw); text-decoration:underline; }
-  @media (max-width:900px) {
-    .row { display:block; margin-bottom:12vw; }
-    .row img { width:100%; height:auto; aspect-ratio:1/1; margin-bottom:16px; }
+  /* ---------- art book spread ---------- */
+  .book {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 5vw;
+    padding: 3.5vh 90px 4.5vh;
+    align-items: stretch;
+    justify-content: center;
+  }
+  .cinema {
+    position: relative;
+    height: 100%;
+    aspect-ratio: 9 / 16;
+    flex-shrink: 0;
+    background: var(--ink-2);
+    overflow: hidden;
+  }
+  .cinema video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s;
+  }
+  .cinema video.on { opacity: 1; }
+  .cinema .tag {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 5;
+    font: 400 10px var(--mono);
+    letter-spacing: 0.2em;
+    color: var(--paper);
+    background: rgba(28, 31, 33, 0.72);
+    padding: 5px 10px;
   }
 
-  footer { background:var(--ink); text-align:right; padding:8px 4.9vw 2px; line-height:1.35; }
-  footer a { margin-left:15px; font-size:max(11px,0.703vw); font-weight:400;
-             color:var(--grey-bright); text-decoration:underline; }
-  footer a:hover { color:#dfe0e1; }
-  @media (max-width:640px) { footer { text-align:center; } footer a { margin:0 7px; display:inline-block; } }
+  .content {
+    display: flex;
+    flex-direction: column;
+    max-width: 620px;
+    min-width: 0;
+  }
+  h1 {
+    font: 600 clamp(22px, 2.6vw, 36px) var(--narrow);
+    text-transform: uppercase;
+    letter-spacing: 0.015em;
+    line-height: 1.05;
+  }
+  .meta { margin-top: 10px; color: var(--stone); font-size: 10px; }
+  .text { margin-top: 2.4vh; }
+  .text p {
+    font: 400 15px/1.7 var(--body);
+    color: var(--paper-dim);
+    margin-bottom: 10px;
+  }
+  .maplabel { margin-top: 2.6vh; color: var(--mute); font-size: 10px; }
+  .mapwrap {
+    position: relative;
+    margin-top: 1.2vh;
+    align-self: flex-start;
+    min-height: 0;
+    flex: 1;
+    display: flex;
+  }
+  .mapwrap .mapinner { position: relative; height: 100%; }
+  .mapwrap img {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+  }
+  .pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%; /* a map pin is a map pin */
+    background: var(--ink-bg);
+    color: var(--paper);
+    font: 400 10px var(--mono);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--paper);
+    transition: transform 0.2s, background 0.2s, color 0.2s;
+  }
+  .pin:hover { transform: translate(-50%, -50%) scale(1.25); background: var(--hover); }
+  .pin.on { background: var(--stone); color: var(--ink-bg); border-color: var(--ink-bg); }
+
+  /* ---------- mobile: vertical scroll ---------- */
+  @media (max-width: 860px) {
+    html, body { height: auto; overflow: auto; }
+    body { display: block; }
+    header { padding: 22px 24px 0; }
+    /* phone order: text + map first, film last — saves the long scrolls
+       between picking a pin and seeing the sculpture */
+    .book { display: flex; flex-direction: column; padding: 20px 24px 60px; }
+    .content { order: 1; max-width: none; margin-top: 12px; }
+    .cinema { order: 2; height: auto; width: min(78vw, 420px); aspect-ratio: 9 / 16; margin: 32px auto 0; }
+    .mapwrap { flex: none; }
+    .mapwrap .mapinner { height: auto; width: 100%; }
+    .mapwrap img { height: auto; width: 100%; }
+  }
 </style>
-</head><body>
-<header class="site">
-  <a class="mark" href="../#home">GUY&nbsp;NISBETT</a>
-  <nav>
-    <a href="../#about">ABOUT</a>
-    <a href="../#work">WORK</a>
-    <a href="../blog/">BLOG</a>
-    <a href="../#contact">CONTACT</a>
-  </nav>
+
+<header>
+  <a class="wm" href="../#home">GUY&nbsp;NISBETT</a>
+  <a class="back" href="index.html">BACK TO BLOG</a>
 </header>
-<main class="post"><div class="meta">13 Mar 2025</div><h1>AI - A Brutalist Sculpture Show</h1><article><p>Written By Guy Nisbett</p>
-<p>Welcome to the private view of my first sculpture show, at The Barbican in London… with a little help from AI.</p>
-<p>In the heart of the Barbican Estate is the typically hard to find ‘Sculpture Court’. Next to the disused original entrance to the art gallery, it was designed for open air sculpture exhibitions, but has no sculptures. This ‘Brutalist Sculpture Show’ series uses photography and AI to imagine what could have been.</p>
-<div class="gallery"><img loading="lazy" alt="IMG_5529 2 V2.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741945784128-02LA9KH4WCJHZ8ON2F1H/IMG_5529+2+V2.jpg" /><img loading="lazy" alt="IMG_5605 v3.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944514655-XI2WLV8ZY023TLCIJYFC/IMG_5605+v3.jpg" /><img loading="lazy" alt="IMG_5603 v2.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944508847-HDZCHT8RSI9YZ729JL8O/IMG_5603+v2.jpg" /><img loading="lazy" alt="IMG_55572.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944520413-CP3YMMR4WS5UX5PZ14BK/IMG_55572.jpg" /><img loading="lazy" alt="IMG_5563.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944504132-PECT08IPS5U971RRMCZU/IMG_5563.jpg" /><img loading="lazy" alt="IMG_5606.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944515720-EMVV0X69U55QQYLQJTZY/IMG_5606.jpg" /><img loading="lazy" alt="IMG_5575.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944505527-ZP8CSFYAQCBUB2BNKNQF/IMG_5575.jpg" /><img loading="lazy" alt="IMG_5604.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944511620-0CG4Z90B7YTHOACS9NMO/IMG_5604.jpg" /><img loading="lazy" alt="" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/16bddba9-47cd-48b0-ad33-22a1f3261209/map6.jpg" /></div><p><em>A Brutalist Sculpture Show - Locations</em></p>
-<div class="gallery"><img loading="lazy" alt="IMG_5529 2 V2.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741945820198-25UP6UJD6KT1H7FCTIWT/IMG_5529+2+V2.jpg" /><img loading="lazy" alt="IMG_5605 v3.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944613189-AVXS5BLQYB3O7PVQEU9G/IMG_5605+v3.jpg" /><img loading="lazy" alt="IMG_5603 v2.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944607152-VQZGK08AWUX8JGHGNKJ6/IMG_5603+v2.jpg" /><img loading="lazy" alt="IMG_55572.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944618759-LNPNAETNMA7B1NZNUNT8/IMG_55572.jpg" /><img loading="lazy" alt="IMG_5563.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944602304-J41JPXAVQP4LFLBSWEJU/IMG_5563.jpg" /><img loading="lazy" alt="IMG_5606.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944613660-5T8U4N16LIAA2H4B7AJV/IMG_5606.jpg" /><img loading="lazy" alt="IMG_5575.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944603336-64BGNPG9DE61E8ADP3P6/IMG_5575.jpg" /><img loading="lazy" alt="IMG_5604.jpg" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1741944609403-ECOULPI3ULW10ULCHWDP/IMG_5604.jpg" /></div></article></main>
-<footer>
-  <a href="../#home">Home</a><a href="../#about">About</a>
-  <a href="../#work">Work</a><a href="../blog/">Blog</a>
-  <a href="../privacy.html">Privacy and cookies</a>
-</footer>
-</body></html>
+
+<div class="book">
+  <div class="cinema" id="cinema">
+    <div class="tag" id="tag">SCULPTURE 1</div>
+  </div>
+
+  <div class="content">
+    <h1>A Brutalist Sculpture Show</h1>
+    <div class="meta mono">THE BARBICAN, LONDON · PHOTOGRAPHY + AI</div>
+
+    <div class="text">
+      <p>Welcome to the private view of a sculpture show, at The Barbican in London… with a little help from AI.</p>
+      <p>In the heart of the Barbican Estate is the typically hard to find 'Sculpture Court'. Next to the disused original entrance to the art gallery, it was designed for open air sculpture exhibitions, but has no sculptures. This 'Brutalist Sculpture Show' series uses photography and AI to imagine what could have been.</p>
+    </div>
+
+    <div class="maplabel mono">SCULPTURE COURT — CLICK A LOCATION</div>
+    <div class="mapwrap">
+      <div class="mapinner">
+        <img src="about-assets/cs/brutalist/map_clean.jpg" alt="Map of the Sculpture Court">
+        <div id="pins"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* red-dot positions detected from Guy's marked maps (percent of map image).
+   Loops are LOCAL files (about-assets/cs/brutalist) — instant switching,
+   no Vimeo round-trip. */
+const SCULPTURES = [
+  { n: 1, src: 'about-assets/cs/brutalist/sculpture1.mp4', x: 40.1, y: 42.0 },
+  { n: 2, src: 'about-assets/cs/brutalist/sculpture2.mp4', x: 75.5, y: 51.1 },
+  { n: 3, src: 'about-assets/cs/brutalist/sculpture3.mp4', x: 20.4, y: 58.2 },
+  { n: 4, src: 'about-assets/cs/brutalist/sculpture4.mp4', x: 51.5, y: 35.5 },
+  { n: 5, src: 'about-assets/cs/brutalist/sculpture5.mp4', x: 47.3, y: 35.7 },
+  { n: 6, src: 'about-assets/cs/brutalist/sculpture6.mp4', x: 41.7, y: 37.6 },
+  { n: 7, src: 'about-assets/cs/brutalist/sculpture7.mp4', x: 62.1, y: 56.6 },
+];
+
+const cinema = document.getElementById('cinema');
+const tag = document.getElementById('tag');
+const pinsEl = document.getElementById('pins');
+const vids = [];
+
+SCULPTURES.forEach((s, i) => {
+  const v = document.createElement('video');
+  v.src = s.src;
+  v.muted = true;
+  v.loop = true;
+  v.playsInline = true;
+  v.setAttribute('playsinline', '');
+  v.preload = i === 0 ? 'auto' : 'metadata';
+  if (i === 0) { v.classList.add('on'); v.autoplay = true; v.play().catch(() => {}); }
+  cinema.insertBefore(v, tag);
+  vids.push(v);
+
+  const p = document.createElement('div');
+  p.className = 'pin' + (i === 0 ? ' on' : '');
+  p.textContent = s.n;
+  p.style.left = s.x + '%';
+  p.style.top = s.y + '%';
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pin').forEach(x => x.classList.remove('on'));
+    p.classList.add('on');
+    vids.forEach((f, j) => {
+      f.classList.toggle('on', j === i);
+      if (j === i) { f.currentTime = 0; f.play().catch(() => {}); }
+      else f.pause();
+    });
+    tag.textContent = 'SCULPTURE ' + s.n;
+  });
+  pinsEl.appendChild(p);
+});
+</script>
