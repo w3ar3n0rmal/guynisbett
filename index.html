@@ -47,32 +47,43 @@
   }
   .navlink:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-  /* ---------- shared section chrome ---------- */
+  /* ---------- shared section chrome ----------
+     type scale + layout matched to the Squarespace original (measured at
+     1702px viewport: h2 50.8px, kicker 16px, body/credits 12px, all #DFE0E1;
+     video col 58%, text col 33%, ~140px gap, ~96px between films) */
   section { padding: clamp(48px, 9vh, 110px) clamp(20px, 6vw, 90px); }
   .inner { max-width: 1060px; margin: 0 auto; }
-  h2 { font-size: clamp(30px, 3.4vw, 52px); font-weight: 700; line-height: 1.02; margin: 0 0 6px; color: var(--dim); }
-  .kicker { font-size: clamp(13px, 1.1vw, 17px); font-weight: 700; margin: 0 0 18px; color: var(--paper); }
-  p { font-size: clamp(13px, 1.05vw, 16px); line-height: 1.45; margin: 0 0 14px; }
-  .credits { font-size: clamp(11px, 0.85vw, 13px); line-height: 1.6; opacity: 0.85; }
+  h2 { font-size: clamp(30px, 2.98vw, 54px); font-weight: 700; line-height: 1.02; margin: 0 0 6px; color: var(--dim); }
+  .kicker { font-size: clamp(12px, 0.94vw, 17px); font-weight: 700; margin: 28px 0 20px; color: var(--dim); }
+  p { font-size: clamp(11px, 0.72vw, 13px); line-height: 1.3; margin: 0 0 13px; color: var(--dim); }
+  .credits { font-size: clamp(11px, 0.72vw, 13px); line-height: 1.3; }
   a { color: inherit; }
   a:hover { color: var(--paper); }
 
-  /* ---------- about ---------- */
-  #about { background: var(--grey-bright); color: #fff; }
-  #about .skills { font-size: clamp(14px, 1.2vw, 18px); font-weight: 700; margin: 0 0 26px; }
-  #about .statement { font-size: clamp(24px, 2.9vw, 46px); font-weight: 700; line-height: 1.06; margin: 0 0 34px; color: #fff; }
-  #about .bio { max-width: 900px; }
-  #about img.clients { width: 100%; max-width: 900px; display: block; margin: 44px auto 0; }
+  /* ---------- about (centred, like the original) ---------- */
+  #about { background: var(--grey-bright); color: #fff; text-align: center; }
+  #about .skills { font-size: clamp(12px, 0.94vw, 17px); font-weight: 700; margin: 0 0 30px; }
+  #about .statement { font-size: clamp(26px, 2.98vw, 54px); font-weight: 700; line-height: 1.05; margin: 0 auto 36px; max-width: 1240px; color: #fff; }
+  #about .bio { max-width: 1150px; margin: 0 auto; }
+  #about img.clients { width: 100%; max-width: 980px; display: block; margin: 56px auto 0; }
 
-  /* ---------- work ---------- */
-  #work { background: var(--grey-mid); padding-bottom: 0; }
-  .film { padding: clamp(40px, 7vh, 84px) 0; }
+  /* ---------- work: video left / text right ---------- */
+  #work { background: var(--grey-mid); padding: clamp(30px, 3vw, 52px) 4vw; }
+  #work .inner { max-width: none; }
+  .film { display: flex; align-items: flex-start; gap: clamp(36px, 8.7vw, 150px); padding: clamp(30px, 2.9vw, 50px) 0; }
   .film .embed {
-    position: relative; width: 100%; aspect-ratio: 16 / 9;
-    background: #000; margin-bottom: 26px;
+    position: relative; flex: 0 0 58%; aspect-ratio: 16 / 9;
+    background: #000;
   }
   .film .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-  .film .text { max-width: 760px; }
+  .film .text { flex: 1; min-width: 0; }
+  .film .text h2 { margin-top: -10px; }
+  @media (max-width: 900px) {
+    .film { display: block; }
+    .film .embed { margin-bottom: 22px; }
+    .film .text h2 { margin-top: 0; }
+    #work p, #work .credits, #about .bio, #about .skills { font-size: 13px; }
+  }
 
   /* ---------- contact ---------- */
   #contact {
@@ -358,13 +369,11 @@ let layout = null;
 
 function computeLayout(cssW, cssH) {
   const titleSize = Math.min(cssW * 0.088, cssH * 0.14, 118);
-  const subSize   = Math.max(10, titleSize * 0.128);
   const navSize   = Math.max(10, titleSize * 0.115);
   const cx = cssW / 2, cy = cssH / 2;
   const titleY = cy - titleSize * 0.18;
-  const subY   = titleY + titleSize * 0.62;
-  const navY   = subY + titleSize * 0.72;
-  return { cx, titleY, subY, navY, titleSize, subSize, navSize };
+  const navY   = titleY + titleSize * 0.62;   /* where the strapline used to sit */
+  return { cx, titleY, navY, titleSize, navSize };
 }
 
 function navPositions(ctx, L) {
@@ -387,6 +396,13 @@ function spaced(s) { return s.split('').join('  '); }
 const pageCanvas = document.createElement('canvas');
 const pctx = pageCanvas.getContext('2d', { willReadFrequently: true });
 let navRects = [], hoveredNav = -1, revealed = false;
+
+/* frosted-glass wordmark tunables — poke live in the console:
+   GLASS.down = blur strength (bigger = blurrier), GLASS.tint = white lift
+   inside the letters, GLASS.alpha = overall wordmark opacity */
+const GLASS = window.GLASS = { down: 14, tint: 0.14, alpha: 0.85 };
+const glassCanvas = document.createElement('canvas');
+const blurScratch = document.createElement('canvas');
 
 function sampleLum(x, y, w, h, dpr) {
   /* file:// preview taints the canvas (cross-origin images), making
@@ -429,13 +445,42 @@ function paintScene(idx, cssW, cssH, dpr) {
 
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = ink;
-  ctx.font = '700 ' + L.titleSize + 'px ' + FONT;
-  ctx.fillText('GUY NISBETT', L.cx, L.titleY);
 
-  ctx.font = '500 ' + L.subSize + 'px ' + FONT;
-  ctx.fillStyle = dim;
-  ctx.fillText(spaced('CREATIVE / AI / CGI / FILM DIRECTOR'), L.cx, L.subY);
+  /* --- frosted-glass wordmark: the photo, blurred, seen through the letters --- */
+  const gc = glassCanvas;
+  gc.width = pageCanvas.width; gc.height = pageCanvas.height;
+  const gx = gc.getContext('2d');
+  gx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  gx.textAlign = 'center';
+  gx.textBaseline = 'alphabetic';
+  gx.font = '700 ' + L.titleSize + 'px ' + FONT;
+  gx.fillStyle = '#ffffff';
+  gx.fillText('GUY NISBETT', L.cx, L.titleY);
+  if (g && g.img && g.img.naturalWidth) {
+    /* cheap strong blur: bounce the cover-fit photo through a tiny canvas */
+    const f = Math.max(2, GLASS.down);
+    const bs = blurScratch;
+    bs.width = Math.max(2, Math.round(cssW / f));
+    bs.height = Math.max(2, Math.round(cssH / f));
+    const bx = bs.getContext('2d');
+    const p2 = Math.max(bs.width / g.img.naturalWidth, bs.height / g.img.naturalHeight);
+    bx.drawImage(g.img,
+      (bs.width - g.img.naturalWidth * p2) / 2, (bs.height - g.img.naturalHeight * p2) / 2,
+      g.img.naturalWidth * p2, g.img.naturalHeight * p2);
+    gx.globalCompositeOperation = 'source-in';
+    gx.imageSmoothingEnabled = true;
+    gx.imageSmoothingQuality = 'high';
+    gx.drawImage(bs, 0, 0, bs.width, bs.height, 0, 0, cssW, cssH);
+  }
+  gx.globalCompositeOperation = 'source-atop';   /* white lift = ground glass */
+  gx.fillStyle = 'rgba(255,255,255,' + GLASS.tint + ')';
+  gx.fillRect(0, 0, cssW, cssH);
+  gx.globalCompositeOperation = 'source-over';
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = GLASS.alpha;
+  ctx.drawImage(gc, 0, 0);
+  ctx.restore();
 
   navRects = navPositions(ctx, L);
   if (revealed) {
