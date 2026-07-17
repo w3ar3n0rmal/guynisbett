@@ -96,7 +96,8 @@
   #contact {
     position: relative; color: #fff; text-align: center;
     background: var(--ink) url('https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1611077982896-3TN2FUZYOBK4EMCFVIBU/Image.jpeg') center/cover no-repeat;
-    min-height: min(65.2vw, 100svh);
+    box-sizing: border-box;
+    min-height: 65.2vw;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
     padding: 9.2vw 6vw 8.5vw;
   }
@@ -111,7 +112,7 @@
   #contact .social svg { width: 100%; height: 100%; display: block; fill: currentColor; }
 
   /* ---------- footer: thin right-aligned strip ---------- */
-  footer { background: var(--ink); text-align: right; padding: 9px 4.9vw 10px; }
+  footer { background: var(--ink); text-align: right; padding: 8px 4.9vw 2px; line-height: 1.35; }
   footer a {
     margin-left: 15px; font-size: max(11px, 0.703vw); font-weight: 400;
     color: var(--grey-bright); text-decoration: underline;
