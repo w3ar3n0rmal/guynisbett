@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GUY NISBETT — Creative / AI / CGI / Film Director</title>
+<meta name="description" content="Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.">
+<meta property="og:title" content="GUY NISBETT">
+<meta property="og:description" content="Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.">
+<meta property="og:url" content="https://guynisbett.com">
+<!-- ADOBE FONTS: replace XXXXXXX with your web-project kit id from fonts.adobe.com -->
+<!-- <link rel="stylesheet" href="https://use.typekit.net/XXXXXXX.css"> -->
+<style>
+  :root {
+    --grey-bright: #a8a6a1;   /* about ground        */
+    --grey-mid:    #7e7d7c;   /* work ground         */
+    --ink:         #38383b;   /* footer / dark ground */
+    --paper:       #ffffff;
+    --dim:         #dfe0e1;
+    --font: "aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  html, body { margin: 0; padding: 0; background: var(--grey-mid); }
+  html { scroll-behavior: smooth; }
+  /* the page is locked to the hero until a nav link is used */
+  html:not(.scrollable), html:not(.scrollable) body { height: 100%; overflow: hidden; }
+  body { font-family: var(--font); color: var(--dim); -webkit-font-smoothing: antialiased; }
+
+  /* ---------- hero ---------- */
+  #hero {
+    position: relative;
+    height: 100svh;
+    min-height: 480px;
+    touch-action: none;
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
+    overflow: hidden;
+    background: var(--grey-bright);
+    cursor: crosshair;
+  }
+  html.scrollable #hero { touch-action: pan-y; }
+  #hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .navlink {
+    position: absolute;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .navlink:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+  /* ---------- shared section chrome ---------- */
+  section { padding: clamp(48px, 9vh, 110px) clamp(20px, 6vw, 90px); }
+  .inner { max-width: 1060px; margin: 0 auto; }
+  h2 { font-size: clamp(30px, 3.4vw, 52px); font-weight: 700; line-height: 1.02; margin: 0 0 6px; color: var(--dim); }
+  .kicker { font-size: clamp(13px, 1.1vw, 17px); font-weight: 700; margin: 0 0 18px; color: var(--paper); }
+  p { font-size: clamp(13px, 1.05vw, 16px); line-height: 1.45; margin: 0 0 14px; }
+  .credits { font-size: clamp(11px, 0.85vw, 13px); line-height: 1.6; opacity: 0.85; }
+  a { color: inherit; }
+  a:hover { color: var(--paper); }
+
+  /* ---------- about ---------- */
+  #about { background: var(--grey-bright); color: #fff; }
+  #about .skills { font-size: clamp(14px, 1.2vw, 18px); font-weight: 700; margin: 0 0 26px; }
+  #about .statement { font-size: clamp(24px, 2.9vw, 46px); font-weight: 700; line-height: 1.06; margin: 0 0 34px; color: #fff; }
+  #about .bio { max-width: 900px; }
+  #about img.clients { width: 100%; max-width: 900px; display: block; margin: 44px auto 0; }
+
+  /* ---------- work ---------- */
+  #work { background: var(--grey-mid); padding-bottom: 0; }
+  .film { padding: clamp(40px, 7vh, 84px) 0; }
+  .film .embed {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #000; margin-bottom: 26px;
+  }
+  .film .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .film .text { max-width: 760px; }
+
+  /* ---------- contact ---------- */
+  #contact {
+    position: relative; color: #fff;
+    background: var(--ink) url('https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1611077982896-3TN2FUZYOBK4EMCFVIBU/Image.jpeg') center/cover no-repeat;
+    min-height: 46svh; display: flex; align-items: center;
+  }
+  #contact::before { content: ""; position: absolute; inset: 0; background: rgba(56,56,59,0.43); }
+  #contact .inner { position: relative; width: 100%; }
+  #contact h2 { color: #fff; }
+  #contact .mail { display: inline-block; margin: 10px 0 26px; font-weight: 700; font-size: clamp(14px, 1.2vw, 18px); color: #fff; }
+  #contact .social a { margin-right: 26px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; color: var(--dim); }
+  #contact .social a:hover { color: #fff; }
+
+  /* ---------- footer ---------- */
+  footer { background: var(--ink); color: var(--dim); padding: 30px clamp(20px, 6vw, 90px); }
+  footer a { margin-right: 22px; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-decoration: none; }
+  @media (max-width: 640px) {
+    footer a { display: inline-block; margin-bottom: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="hero"><canvas id="gl"></canvas></div>
+
+<main>
+  <section id="about">
+    <div class="inner">
+      <p class="skills">Live action direction. CGI direction. Creative direction. Cinematography. Editing. Post production.</p>
+      <p class="statement">Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.</p>
+      <p class="bio">Trained at BBC Television, he directed a string of top ten music videos before moving into advertising, combining live action, motion graphics and CGI with award winning results. Alongside work with larger crews and post-production facilities, he began shooting and editing many of his films, pushing the boundaries of multi-skilled production. Most recently he embraced AI production, founding NORMAL to handle generative AI focused work. His films span automotive, luxury, travel, architecture, technology, lifestyle, documentary and more, using location and studio shooting, green screen, drones, voice over, interviews, motion graphics, CGI, 360, VR and generative AI. A multi-skilled approach allows him to work flexibly with both large and small teams. All the way from developing creative treatments and scripting, to directing live action and CGI, and delivering remotely from his own suite. He is based in the City of London, UK.</p>
+      <img class="clients" src="https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1611074413444-LQ1JI9H6H051D80H0HRH/Logo+grid+5+90+percent.png" alt="Selected clients" loading="lazy">
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="inner">
+      <!-- film sections generated by build.py from films.json -->
+      
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/1113184247?h=6ede6b1bc7" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="normal — Generative AI"></iframe></div>
+        <div class="text">
+          <h2>normal</h2>
+          <p class="kicker">Generative AI</p>
+          <p>Introducing <strong>normal</strong>, combining cutting edge AI with award-winning, human filmmaking. Find out more at <a href="https://wearenormal.ai" target="_blank" rel="noopener"><strong>wearenormal.ai</strong></a></p>
+          
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/500059330?h=a2dc2561f1" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Showreel — Live Action and CGI Direction"></iframe></div>
+        <div class="text">
+          <h2>Showreel</h2>
+          <p class="kicker">Live Action and CGI Direction</p>
+          <p>Work for Land Rover, Honda, British Airways, Santander, Gtech, Hewlett Packard, Earth+Sky, Molton Brown, Aspria, Expo2020, Populous, Alcatel-Lucent, Ripper Street, Hotpoint &amp; Reto Moto.</p>
+          
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/1051940365?h=de4b7627a2" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Experiential — CPPS Earthquake Education Centre, Switzerland"></iframe></div>
+        <div class="text">
+          <h2>Experiential</h2>
+          <p class="kicker">CPPS Earthquake Education Centre, Switzerland</p>
+          <p>Combining immersive projections with a sophisticated hydraulic platform driven by seismic data, the CPPS Earthquake Simulator can replicate any earthquake. Together with the INK creative and CGI team, we developed a series of 30 minute films, transporting visitors to the epicentre of history’s most destructive earthquakes, while explaining the science, and training them to survive.</p>
+          <p class="credits">Creative &amp; Script: Guy Nisbett<br>Co-Director with the INK creative team: Guy Nisbett<br>Production Company: INK<br>Client: CPPS</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/645115765?h=d7ca7932bf" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Recent Awards — Virgin O2 + Carers UK"></iframe></div>
+        <div class="text">
+          <h2>Recent Awards</h2>
+          <p class="kicker">Virgin O2 + Carers UK</p>
+          <p><em>WINNER OF TWO EVCOM FILM AWARDS, 2022 &nbsp;NOMINATED FOR TWO EVCOM CLARION AWARDS, 2022</em><br><br>To launch the partnership of Virgin O2 and Carers UK, a dramatised story based on interviews with three carers, with an uplifting twist.</p>
+          <p class="credits">Director &amp; Creative: Guy Nisbett<br>Production Company: Taylor Made Media<br>Client: Virgin O2<br>Producer: Sophie Taylor<br>Head of Production: Ian McGinty<br>DoP: Steve Moss<br>Sound recordist: Sam Diamond<br>Editing and Post: Guy Nisbett</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/885222917" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Technology — Levidian - LOOP"></iframe></div>
+        <div class="text">
+          <h2>Technology</h2>
+          <p class="kicker">Levidian - LOOP</p>
+          <p>Levidian’s clever technology turns the greenhouse gas methane into hydrogen and graphene. Clean energy, and a building block for advanced materials. See how it works in this CGI film, directed for INK.</p>
+          <p class="credits">Director &amp; Creative: Guy Nisbett<br>Production Company: INK<br>CGI Production: INK<br>Client: LEVIDIAN</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/487519591?h=175a3fe601&background=1&autoplay=1&loop=1" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Fashion — Resort 2021"></iframe></div>
+        <div class="text">
+          <h2>Fashion</h2>
+          <p class="kicker">Resort 2021</p>
+          <p>A social, online and in-store campaign for the EUDON CHOI Resort 2021 collection, exploring the boundaries of film and photography with a series of seamless, slow motion loops.</p>
+          <p class="credits">Client: EUDON CHOI</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/44989074?h=23b6c3f943" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Formula 1 — The London Grand Prix by Santander"></iframe></div>
+        <div class="text">
+          <h2>Formula 1</h2>
+          <p class="kicker">The London Grand Prix by Santander</p>
+          <p>World Champions Lewis Hamilton and Jenson Button imagine a London F1 street race, in an award winning live action and CGI film, directed, scripted and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Motion Graphics: Territory Studio<br>Client: Santander</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/190100634?h=fd86b75870" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Technology — The Gtech Mountain eBike"></iframe></div>
+        <div class="text">
+          <h2>Technology</h2>
+          <p class="kicker">The Gtech Mountain eBike</p>
+          <p>Live action, motion graphics and drones in Snowdonia, with voice over provided by Gtech’s founder, Nick Grey. Directed and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: INK<br>Client: Gtech</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/264415641?h=3dcd8f7b03" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Lifestyle — HP Envy X2"></iframe></div>
+        <div class="text">
+          <h2>Lifestyle</h2>
+          <p class="kicker">HP Envy X2</p>
+          <p>Everything you can do with with the Envy x2, including shoot yourself dancing. Directed and cut by Guy Nisbett.</p>
+          <p class="credits">Agency: AMVBBDO<br>Client: HP</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/143030106?h=bb9e161ad3" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Luxury — Molton Brown - Tobacco Absolute"></iframe></div>
+        <div class="text">
+          <h2>Luxury</h2>
+          <p class="kicker">Molton Brown - Tobacco Absolute</p>
+          <p>Botanist Dr. Mark Spencer explains the allure of the tobacco plant, from a series of films exploring the ingredients of their perfumes. Directed, shot, and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: Connected Pictures<br>Client: Molton Brown</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/44921649?h=7dbb0a14ea" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Design — BA - Behind the Design"></iframe></div>
+        <div class="text">
+          <h2>Design</h2>
+          <p class="kicker">BA - Behind the Design</p>
+          <p>For the launch of the redesigned British Airways cabin, we go ‘behind the design’, to show the passion and attention to detail of the designers, as well as their influences in luxury products. Directed, shot, and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: Connected Pictures<br>Client: British Airways</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/256814879?h=7d13242b62" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Architecture — The Copyright Building"></iframe></div>
+        <div class="text">
+          <h2>Architecture</h2>
+          <p class="kicker">The Copyright Building</p>
+          <p>An interview lead film without talking heads, based on audio recordings of the architects in conversation with the director. Following its successful launch, The Copyright Building is set to become the UK headquarters of Netflix. Directed, shot, cut and graded by Guy Nisbett.</p>
+          <p class="credits">Production Company: INK<br>Client: Piercy&amp;Co</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/500156240?h=d41233eecd" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Automotive — Land Rover Future Technologies"></iframe></div>
+        <div class="text">
+          <h2>Automotive</h2>
+          <p class="kicker">Land Rover Future Technologies</p>
+          <p>Scripted and directed by Guy Nisbett, the Discovery Vision Concept is brought to life using CGI, voice over, and artful sound design.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: Land Rover</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/250636997?h=77fc267181" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="VR / 360 — ENEC Nuclear Reactor Tour"></iframe></div>
+        <div class="text">
+          <h2>VR / 360</h2>
+          <p class="kicker">ENEC Nuclear Reactor Tour</p>
+          <p>Designed to be viewed in 3D using the Samsung Gear, this 360 film gives a guided tour of the Barakah reactor, explaining how electricity is generated. Scripted and directed by Guy Nisbett, the film offers an audience of students and school children a compelling and comfortable experience of VR.<br><br><strong>On mobile devices, for the best experience watch the film in the YouTube app, <a href="https://youtu.be/WdKh2R00TOo" target="_blank" rel="noopener">here</a>.</strong></p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: ENEC</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/500841458?h=441f23e672" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Architecture — Winstanley &amp; York Road Masterplan"></iframe></div>
+        <div class="text">
+          <h2>Architecture</h2>
+          <p class="kicker">Winstanley &amp; York Road Masterplan</p>
+          <p>The masterplan for a new district in south west London is brought to life with CGI, motion graphics and voice over in a film scripted, directed and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: Balfour Beatty</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="inner">
+      <h2>Get in touch.</h2><br>
+      <a class="mail" href="mailto:hello@guynisbett.com?subject=Enquiry">send email</a>
+      <div class="social">
+        <a href="https://instagram.com/guynisbett" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://vimeo.com/guynisbett" target="_blank" rel="noopener">Vimeo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a href="#" id="homeLink">Home</a>
+  <a href="#about">About</a>
+  <a href="#work">Work</a>
+  <a href="blog/">Blog</a>
+  <a href="privacy.html">Privacy and cookies</a>
+</footer>
+
+<script>
+(() => {
+'use strict';
+
+/* =========================================================================
+   GUY NISBETT landing — water hero over a cycling photo gallery.
+   Adapted from the NORMAL SITE V3 water landing (water-normal.template.html):
+   same WebGL height-field sim + refraction shader; the wordmark, subtitle
+   and nav are painted straight onto the page canvas with webfonts instead
+   of being extracted from PNG artwork. Photos cycle from the start (4s);
+   the nav appears on first interaction; nav clicks unlock page scroll.
+   ========================================================================= */
+
+const hero   = document.getElementById('hero');
+const canvas = document.getElementById('gl');
+
+const DPR_CAP = 2, MAX_DROPS = 24;
+const FADE_MS = 750, AUTO_MS = 4000;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const W = window.WATER = {
+  stiffness: 1.9, dampVel: 0.986, dampH: 0.9985, steps: 2,
+  refract: 0.24, slope: 26.0, shade: 0.9, spec: 0.55,
+  moveRadius: 13, tapRadius: 30, tapStrength: -0.42,
+  introRainEvery: 1300, idleRainEvery: 2600, longPressMs: 550
+};
+
+/* gallery manifest — generated by build.py from ../GALLERY */
+const GALLERY = [{"src": "assets/gallery/01.jpg"}, {"src": "assets/gallery/02.jpg"}, {"src": "assets/gallery/03.jpg"}];
+
+const NAV = [
+  { label: 'ABOUT',   target: '#about' },
+  { label: 'WORK',    target: '#work' },
+  { label: 'BLOG',    target: 'blog/' },
+  { label: 'CONTACT', target: '#contact' }
+];
+
+/* ---------- type layout (css px, computed per resize) ---------- */
+const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
+let layout = null;
+
+function computeLayout(cssW, cssH) {
+  const titleSize = Math.min(cssW * 0.088, cssH * 0.14, 118);
+  const subSize   = Math.max(10, titleSize * 0.128);
+  const navSize   = Math.max(10, titleSize * 0.115);
+  const cx = cssW / 2, cy = cssH / 2;
+  const titleY = cy - titleSize * 0.18;
+  const subY   = titleY + titleSize * 0.62;
+  const navY   = subY + titleSize * 0.72;
+  return { cx, titleY, subY, navY, titleSize, subSize, navSize };
+}
+
+function navPositions(ctx, L) {
+  ctx.font = '700 ' + L.navSize + 'px ' + FONT;
+  const gap = L.navSize * 2.2;
+  const widths = NAV.map(n => ctx.measureText(spaced(n.label)).width);
+  const total = widths.reduce((a, b) => a + b, 0) + gap * (NAV.length - 1);
+  let x = L.cx - total / 2;
+  return NAV.map((n, i) => {
+    const r = { x, y: L.navY - L.navSize, w: widths[i], h: L.navSize * 1.6 };
+    x += widths[i] + gap;
+    return r;
+  });
+}
+
+/* letter-spacing for canvas text: inject hair spaces */
+function spaced(s) { return s.split('').join('  '); }
+
+/* ---------- scene painting ---------- */
+const pageCanvas = document.createElement('canvas');
+const pctx = pageCanvas.getContext('2d', { willReadFrequently: true });
+let navRects = [], hoveredNav = -1, revealed = false;
+
+function sampleLum(x, y, w, h, dpr) {
+  /* file:// preview taints the canvas (cross-origin images), making
+     getImageData throw — fall back to "dark" so the type paints white */
+  try {
+    const t = document.createElement('canvas');
+    t.width = 8; t.height = 8;
+    const tc = t.getContext('2d', { willReadFrequently: true });
+    tc.drawImage(pageCanvas, x * dpr, y * dpr, Math.max(1, w * dpr), Math.max(1, h * dpr), 0, 0, 8, 8);
+    const d = tc.getImageData(0, 0, 8, 8).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += 4) sum += 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
+    return sum / 64;
+  } catch (e) { return 100; }
+}
+
+function paintScene(idx, cssW, cssH, dpr) {
+  pageCanvas.width  = Math.round(cssW * dpr);
+  pageCanvas.height = Math.round(cssH * dpr);
+  const ctx = pctx;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  ctx.fillStyle = '#a8a6a1';
+  ctx.fillRect(0, 0, cssW, cssH);
+  const g = GALLERY.length ? GALLERY[idx % GALLERY.length] : null;
+  if (g && g.img && g.img.naturalWidth) {
+    const ps = Math.max(cssW / g.img.naturalWidth, cssH / g.img.naturalHeight);
+    ctx.drawImage(g.img,
+      (cssW - g.img.naturalWidth * ps) / 2, (cssH - g.img.naturalHeight * ps) / 2,
+      g.img.naturalWidth * ps, g.img.naturalHeight * ps);
+  }
+
+  try {
+  const L = layout = computeLayout(cssW, cssH);
+
+  /* ink colour flips black/white against the photo behind the type block */
+  const blockLum = sampleLum(cssW * 0.2, L.titleY - L.titleSize, cssW * 0.6, L.titleSize * 2.4, dpr);
+  const ink = blockLum < 140 ? '#ffffff' : '#1c1f21';
+  const dim = blockLum < 140 ? 'rgba(255,255,255,0.82)' : 'rgba(28,31,33,0.82)';
+
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = ink;
+  ctx.font = '700 ' + L.titleSize + 'px ' + FONT;
+  ctx.fillText('GUY NISBETT', L.cx, L.titleY);
+
+  ctx.font = '500 ' + L.subSize + 'px ' + FONT;
+  ctx.fillStyle = dim;
+  ctx.fillText(spaced('CREATIVE / AI / CGI / FILM DIRECTOR'), L.cx, L.subY);
+
+  navRects = navPositions(ctx, L);
+  if (revealed) {
+    ctx.textAlign = 'left';
+    ctx.font = '700 ' + L.navSize + 'px ' + FONT;
+    navRects.forEach((r, i) => {
+      ctx.fillStyle = hoveredNav === i ? ink : dim;
+      ctx.fillText(spaced(NAV[i].label), r.x, L.navY);
+      if (hoveredNav === i) {
+        ctx.fillRect(r.x, L.navY + L.navSize * 0.42, r.w, 2);
+      }
+    });
+    ctx.textAlign = 'center';
+  }
+  } catch (err) { console.error('paintScene:', err); }
+}
+
+/* ---------- real invisible links over the painted nav ---------- */
+const navEls = NAV.map((n, i) => {
+  const a = document.createElement('a');
+  a.href = n.target;
+  a.className = 'navlink';
+  a.style.display = 'none';
+  a.setAttribute('aria-label', n.label);
+  a.addEventListener('mouseenter', () => setHover(i));
+  a.addEventListener('mouseleave', () => setHover(-1));
+  a.addEventListener('focus', () => setHover(i));
+  a.addEventListener('blur', () => setHover(-1));
+  a.addEventListener('click', (e) => {
+    if (n.target.startsWith('#')) {
+      e.preventDefault();
+      unlockAndScroll(n.target);
+    } /* BLOG is a real navigation */
+  });
+  hero.appendChild(a);
+  return a;
+});
+
+function positionNavLinks() {
+  navRects.forEach((r, i) => {
+    const s = navEls[i].style;
+    s.display = revealed ? '' : 'none';
+    const padX = Math.max(10, (44 - r.w) / 2), padY = Math.max(8, (44 - r.h) / 2);
+    s.left = (r.x - padX) + 'px';
+    s.top = (r.y - padY) + 'px';
+    s.width = (r.w + padX * 2) + 'px';
+    s.height = (r.h + padY * 2) + 'px';
+  });
+}
+
+function unlockAndScroll(sel) {
+  document.documentElement.classList.add('scrollable');
+  requestAnimationFrame(() => {
+    const el = document.querySelector(sel);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+document.getElementById('homeLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+function setHover(i) {
+  if (hoveredNav === i) return;
+  hoveredNav = i;
+  if (gl && fadeTo < 0) repaintCurrent();
+}
+
+/* ---------- WebGL (verbatim from the NORMAL landing) ---------- */
+const VERT = `
+attribute vec2 aPos; varying vec2 vUV;
+void main() { vUV = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }`;
+const PRECISION = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif`;
+const UPDATE_FRAG = PRECISION + `
+varying vec2 vUV;
+uniform sampler2D uPrev;
+uniform vec2 uTexel; uniform vec2 uAspect;
+uniform float uStiffness; uniform float uDampVel; uniform float uDampH;
+uniform int uDropCount; uniform vec4 uDrops[${MAX_DROPS}];
+void main() {
+  vec4 c = texture2D(uPrev, vUV);
+  float h = c.r; float v = c.g;
+  float sum =
+    texture2D(uPrev, vUV - vec2(uTexel.x, 0.0)).r +
+    texture2D(uPrev, vUV + vec2(uTexel.x, 0.0)).r +
+    texture2D(uPrev, vUV - vec2(0.0, uTexel.y)).r +
+    texture2D(uPrev, vUV + vec2(0.0, uTexel.y)).r;
+  v += (sum * 0.25 - h) * uStiffness;
+  v *= uDampVel; h += v; h *= uDampH;
+  for (int i = 0; i < ${MAX_DROPS}; i++) {
+    if (i >= uDropCount) break;
+    vec4 d = uDrops[i];
+    float dist = length((vUV - d.xy) * uAspect);
+    float t = clamp(dist / d.z, 0.0, 1.0);
+    h += d.w * (0.5 + 0.5 * cos(t * 3.14159265));
+  }
+  gl_FragColor = vec4(h, v, 0.0, 1.0);
+}`;
+const RENDER_FRAG = PRECISION + `
+varying vec2 vUV;
+uniform sampler2D uSim; uniform sampler2D uPage; uniform sampler2D uPageB;
+uniform float uFade; uniform vec2 uTexel;
+uniform float uRefract; uniform float uSlope; uniform float uShade;
+uniform float uSpec; uniform vec3 uSpecColor;
+void main() {
+  float hl = texture2D(uSim, vUV - vec2(uTexel.x, 0.0)).r;
+  float hr = texture2D(uSim, vUV + vec2(uTexel.x, 0.0)).r;
+  float hd = texture2D(uSim, vUV - vec2(0.0, uTexel.y)).r;
+  float hu = texture2D(uSim, vUV + vec2(0.0, uTexel.y)).r;
+  vec2 grad = vec2(hr - hl, hu - hd);
+  vec2 uv = vUV + grad * uRefract;
+  vec3 page = mix(texture2D(uPage, uv).rgb, texture2D(uPageB, uv).rgb, uFade);
+  vec3 n = normalize(vec3(-grad * uSlope, 1.0));
+  vec3 lightDir = normalize(vec3(-0.35, 0.55, 0.75));
+  float spec = pow(max(dot(n, lightDir), 0.0), 90.0) * uSpec;
+  float shade = (grad.x + grad.y) * uShade;
+  gl_FragColor = vec4(page * (1.0 + shade) + uSpecColor * spec, 1.0);
+}`;
+
+function compile(gl, type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+function program(gl, fragSrc) {
+  const p = gl.createProgram();
+  gl.attachShader(p, compile(gl, gl.VERTEX_SHADER, VERT));
+  gl.attachShader(p, compile(gl, gl.FRAGMENT_SHADER, fragSrc));
+  gl.bindAttribLocation(p, 0, 'aPos');
+  gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  return p;
+}
+
+let gl = null, halfType = 0, internalFmt = 0, simLinear = true;
+function initContext() {
+  const opts = { alpha: false, antialias: false, depth: false, stencil: false };
+  const gl2 = canvas.getContext('webgl2', opts);
+  if (gl2) {
+    const extF = gl2.getExtension('EXT_color_buffer_float');
+    const extHF = gl2.getExtension('EXT_color_buffer_half_float');
+    if (extF || extHF) { gl = gl2; halfType = gl2.HALF_FLOAT; internalFmt = gl2.RGBA16F; return true; }
+  }
+  const gl1 = canvas.getContext('webgl', opts) || canvas.getContext('experimental-webgl', opts);
+  if (!gl1) return false;
+  const hf = gl1.getExtension('OES_texture_half_float');
+  if (!hf) return false;
+  simLinear = !!gl1.getExtension('OES_texture_half_float_linear');
+  gl = gl1; halfType = hf.HALF_FLOAT_OES; internalFmt = gl1.RGBA;
+  return true;
+}
+function makeSimTexture(w, h) {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  const filter = simLinear ? gl.LINEAR : gl.NEAREST;
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texImage2D(gl.TEXTURE_2D, 0, internalFmt, w, h, 0, gl.RGBA, halfType, null);
+  const fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  const ok = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  return ok ? { tex, fbo } : null;
+}
+
+let simA = null, simB = null, simW = 0, simH = 0;
+let pageTexA = null, pageTexB = null;
+let updateProg = null, renderProg = null, uniforms = {};
+let cssW = 0, cssH = 0, dpr = 1;
+let drops = [];
+let lastInteraction = 0, running = false;
+let scene = 0, fadeTo = -1, fadeStart = 0, lastSceneChange = 0;
+
+function getUniforms() {
+  const u = (p, n) => gl.getUniformLocation(p, n);
+  uniforms = {
+    upPrev: u(updateProg,'uPrev'), upTexel: u(updateProg,'uTexel'),
+    upAspect: u(updateProg,'uAspect'), upStiff: u(updateProg,'uStiffness'),
+    upDampV: u(updateProg,'uDampVel'), upDampH: u(updateProg,'uDampH'),
+    upCount: u(updateProg,'uDropCount'), upDrops: u(updateProg,'uDrops[0]'),
+    rSim: u(renderProg,'uSim'), rPage: u(renderProg,'uPage'), rPageB: u(renderProg,'uPageB'),
+    rFade: u(renderProg,'uFade'), rTexel: u(renderProg,'uTexel'),
+    rRefract: u(renderProg,'uRefract'), rSlope: u(renderProg,'uSlope'),
+    rShade: u(renderProg,'uShade'), rSpec: u(renderProg,'uSpec'),
+    rSpecColor: u(renderProg,'uSpecColor')
+  };
+}
+function makePageTexture() {
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return tex;
+}
+function uploadPage(tex) {
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pageCanvas);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+}
+function repaintCurrent() {
+  paintScene(scene, cssW, cssH, dpr);
+  positionNavLinks();
+  uploadPage(pageTexA);
+}
+function startFade(target, px, py, splashRadius) {
+  if (!running) return;
+  if (fadeTo >= 0) {
+    scene = fadeTo; fadeTo = -1;
+    const t = pageTexA; pageTexA = pageTexB; pageTexB = t;
+  }
+  fadeTo = target;
+  paintScene(target, cssW, cssH, dpr);
+  positionNavLinks();
+  uploadPage(pageTexB);
+  fadeStart = performance.now();
+  lastSceneChange = performance.now();
+  if (px !== undefined) addDrop(px, py, splashRadius || 40, -0.5);
+}
+function currentBase() { return fadeTo >= 0 ? fadeTo : scene; }
+function nextTarget() { return GALLERY.length ? (currentBase() + 1) % GALLERY.length : 0; }
+function prevTarget() { return GALLERY.length ? (currentBase() + GALLERY.length - 1) % GALLERY.length : 0; }
+function advanceNext(px, py) { if (GALLERY.length > 1) startFade(nextTarget(), px, py); }
+function advancePrev(px, py) { if (GALLERY.length > 1) startFade(prevTarget(), px, py); }
+
+/* first deliberate gesture brings in the nav links */
+function reveal() {
+  if (revealed || !running) return;
+  revealed = true;
+  lastInteraction = performance.now();
+  startFade(currentBase());
+}
+
+function resize() {
+  cssW = hero.clientWidth;
+  cssH = hero.clientHeight;
+  dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  const scale = Math.min(0.5, 512 / Math.max(cssW, cssH));
+  simW = Math.max(64, Math.round(cssW * scale));
+  simH = Math.max(64, Math.round(cssH * scale));
+  simA = makeSimTexture(simW, simH);
+  simB = makeSimTexture(simW, simH);
+  if (!simA || !simB) { fail(); return false; }
+  if (fadeTo >= 0) { scene = fadeTo; fadeTo = -1; }
+  repaintCurrent();
+  return true;
+}
+
+function stepSim(frameDrops) {
+  gl.useProgram(updateProg);
+  gl.viewport(0, 0, simW, simH);
+  gl.uniform2f(uniforms.upTexel, 1 / simW, 1 / simH);
+  gl.uniform2f(uniforms.upAspect, cssW / cssH, 1);
+  gl.uniform1f(uniforms.upStiff, W.stiffness);
+  gl.uniform1f(uniforms.upDampV, W.dampVel);
+  gl.uniform1f(uniforms.upDampH, W.dampH);
+  for (let s = 0; s < W.steps; s++) {
+    const d = s === 0 ? frameDrops : [];
+    const arr = new Float32Array(MAX_DROPS * 4);
+    for (let i = 0; i < d.length; i++) {
+      arr[i*4] = d[i].x / cssW;
+      arr[i*4+1] = 1 - d[i].y / cssH;
+      arr[i*4+2] = Math.max(0.004, d[i].radius / cssH);
+      arr[i*4+3] = d[i].strength;
+    }
+    gl.uniform1i(uniforms.upCount, d.length);
+    gl.uniform4fv(uniforms.upDrops, arr);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, simB.fbo);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, simA.tex);
+    gl.uniform1i(uniforms.upPrev, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    const t = simA; simA = simB; simB = t;
+  }
+}
+function render(fade) {
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.useProgram(renderProg);
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, simA.tex);
+  gl.uniform1i(uniforms.rSim, 0);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, pageTexA);
+  gl.uniform1i(uniforms.rPage, 1);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, pageTexB);
+  gl.uniform1i(uniforms.rPageB, 2);
+  gl.uniform1f(uniforms.rFade, fade);
+  gl.uniform2f(uniforms.rTexel, 1 / simW, 1 / simH);
+  gl.uniform1f(uniforms.rRefract, W.refract);
+  gl.uniform1f(uniforms.rSlope, W.slope);
+  gl.uniform1f(uniforms.rShade, W.shade);
+  gl.uniform1f(uniforms.rSpec, W.spec);
+  gl.uniform3f(uniforms.rSpecColor, 1.0, 1.0, 0.97);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+function frame() {
+  if (!running) return;
+  const d = drops.length > MAX_DROPS ? drops.slice(-MAX_DROPS) : drops;
+  drops = [];
+  stepSim(d);
+  let fade = 0;
+  if (fadeTo >= 0) {
+    fade = Math.min(1, (performance.now() - fadeStart) / FADE_MS);
+    if (fade >= 1) {
+      scene = fadeTo; fadeTo = -1;
+      const t = pageTexA; pageTexA = pageTexB; pageTexB = t;
+      fade = 0;
+    }
+  }
+  render(fade);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- input ---------- */
+const pointers = new Map();
+let press = null, touchDragDist = 0;
+
+function addDrop(x, y, radius, strength) {
+  drops.push({ x, y, radius, strength });
+  lastInteraction = performance.now();
+}
+function heroXY(e) {
+  const r = hero.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+hero.addEventListener('pointerdown', (e) => {
+  const pt = heroXY(e);
+  pointers.set(e.pointerId, pt);
+  addDrop(pt.x, pt.y, W.tapRadius, W.tapStrength);
+  if (e.target.closest('a')) return;
+  if (press) { clearTimeout(press.timer); press = null; reveal(); return; }
+  const p = { id: e.pointerId, x: pt.x, y: pt.y, t: performance.now(), fired: false };
+  p.timer = setTimeout(() => {
+    p.fired = true;
+    if (!revealed) reveal();
+    else advanceNext(p.x, p.y);
+  }, W.longPressMs);
+  press = p;
+});
+hero.addEventListener('pointermove', (e) => {
+  const pt = heroXY(e);
+  const prev = pointers.get(e.pointerId);
+  if (press && press.id === e.pointerId && Math.hypot(pt.x - press.x, pt.y - press.y) > 12) {
+    clearTimeout(press.timer); press = null;
+  }
+  if (prev) {
+    const dx = pt.x - prev.x, dy = pt.y - prev.y;
+    const dist = Math.hypot(dx, dy);
+    if (e.pointerType !== 'mouse') {
+      touchDragDist += dist;
+      if (touchDragDist > 40) reveal();
+    }
+    const steps = Math.min(8, Math.max(1, Math.floor(dist / 7)));
+    const strength = -(0.025 + Math.min(dist * 0.0035, 0.12));
+    for (let i = 1; i <= steps; i++) {
+      addDrop(prev.x + dx * i / steps, prev.y + dy * i / steps, W.moveRadius, strength / Math.sqrt(steps));
+    }
+  } else {
+    addDrop(pt.x, pt.y, W.moveRadius, -0.03);
+  }
+  pointers.set(e.pointerId, pt);
+});
+function endPress(e, allowClick) {
+  if (!press || press.id !== e.pointerId) return;
+  clearTimeout(press.timer);
+  const pt = heroXY(e);
+  const held = performance.now() - press.t;
+  const moved = Math.hypot(pt.x - press.x, pt.y - press.y);
+  const isTap = !press.fired && held < 400 && moved < 6;
+  press = null;
+  if (!allowClick || !isTap) return;
+  if (!revealed) reveal();
+  else if (e.pointerType === 'mouse') advanceNext(pt.x, pt.y);
+}
+hero.addEventListener('pointerup', (e) => {
+  endPress(e, true);
+  if (e.pointerType !== 'mouse') pointers.delete(e.pointerId);
+});
+hero.addEventListener('pointercancel', (e) => { endPress(e, false); pointers.delete(e.pointerId); });
+hero.addEventListener('pointerleave', (e) => { endPress(e, false); pointers.delete(e.pointerId); });
+
+/* desktop scroll gesture reveals the nav (page itself stays locked) */
+window.addEventListener('wheel', () => reveal(), { passive: true });
+window.addEventListener('keydown', (e) => {
+  if (!revealed) { reveal(); return; }
+  if (e.key === 'ArrowRight') advanceNext();
+  if (e.key === 'ArrowLeft') advancePrev();
+});
+
+/* stop iOS scroll/zoom on the water while the page is locked */
+const blockTouch = (e) => {
+  if (document.documentElement.classList.contains('scrollable')) return;
+  if (!e.target.closest('a')) e.preventDefault();
+};
+hero.addEventListener('touchstart', blockTouch, { passive: false });
+hero.addEventListener('touchmove', blockTouch, { passive: false });
+
+/* ---------- rain + auto-cycle ---------- */
+if (!reduceMotion) {
+  setInterval(() => {
+    if (document.hidden || !running) return;
+    if (revealed && performance.now() - lastInteraction < 3500) return;
+    const x = cssW * (0.08 + Math.random() * 0.84);
+    const y = cssH * (0.08 + Math.random() * 0.84);
+    drops.push({ x, y, radius: 9 + Math.random() * 9, strength: -0.10 - Math.random() * 0.09 });
+  }, W.introRainEvery);
+  setInterval(() => {
+    if (!running || document.hidden || GALLERY.length < 2) return;
+    if (fadeTo >= 0) return;
+    if (performance.now() - lastSceneChange < AUTO_MS) return;
+    startFade(nextTarget());
+  }, 500);
+}
+
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => { if (gl) resize(); else drawFallback(); }, 120);
+});
+
+/* ---------- fallback ---------- */
+function drawFallback() {
+  cssW = hero.clientWidth; cssH = hero.clientHeight;
+  dpr = Math.min(DPR_CAP, window.devicePixelRatio || 1);
+  revealed = true;
+  paintScene(scene, cssW, cssH, dpr);
+  positionNavLinks();
+}
+function fail() {
+  running = false;
+  canvas.remove();
+  pageCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
+  hero.insertBefore(pageCanvas, hero.firstChild);
+  drawFallback();
+}
+canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); running = false; });
+canvas.addEventListener('webglcontextrestored', () => location.reload());
+const resumeWater = () => {
+  if (document.hidden || !gl || !updateProg) return;
+  if (gl.isContextLost && gl.isContextLost()) return;
+  if (!running) { running = true; requestAnimationFrame(frame); }
+};
+document.addEventListener('visibilitychange', resumeWater);
+window.addEventListener('pageshow', resumeWater);
+window.addEventListener('focus', resumeWater);
+
+/* ---------- boot ---------- */
+function loadImage(holder) {
+  return new Promise((res) => {
+    holder.img = new Image();
+    holder.img.onload = () => res();
+    holder.img.onerror = () => res();  // a missing photo shouldn't kill the page
+    holder.img.src = holder.src;
+  });
+}
+
+async function boot() {
+  /* wait for the display font so the wordmark paints correctly */
+  try {
+    await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 2500))]);
+  } catch (e) {}
+  await Promise.all(GALLERY.map(loadImage));
+
+  if (!initContext()) { fail(); return; }
+  updateProg = program(gl, UPDATE_FRAG);
+  renderProg = program(gl, RENDER_FRAG);
+  getUniforms();
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  pageTexA = makePageTexture();
+  pageTexB = makePageTexture();
+  if (!resize()) return;
+  uploadPage(pageTexB);
+  running = true;
+  lastSceneChange = performance.now();
+  requestAnimationFrame(frame);
+  /* returning from the blog: skip the intro */
+  if (location.hash === '#home' || location.hash === '#about' ||
+      location.hash === '#work' || location.hash === '#contact') {
+    revealed = true;
+    repaintCurrent();
+    if (location.hash !== '#home') unlockAndScroll(location.hash);
+  }
+  if (!reduceMotion) {
+    setTimeout(() => drops.push({ x: cssW * 0.32, y: cssH * 0.40, radius: 26, strength: -0.32 }), 300);
+    setTimeout(() => drops.push({ x: cssW * 0.66, y: cssH * 0.55, radius: 22, strength: -0.26 }), 750);
+  }
+}
+boot().catch((err) => { fail(); console.error(err); });
+
+})();
+</script>
+</body>
+</html>
