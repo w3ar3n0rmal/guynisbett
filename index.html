@@ -92,21 +92,23 @@
     .film { padding: 7vw 0; }
   }
 
-  /* ---------- contact: tall photo, heading high, icons low ---------- */
+  /* ---------- contact: photo ground, height fits the content ---------- */
   #contact {
     position: relative; color: #fff; text-align: center;
     background: var(--ink) url('https://images.squarespace-cdn.com/content/v1/5fca139877e4bb4508c63ef8/1611077982896-3TN2FUZYOBK4EMCFVIBU/Image.jpeg') center/cover no-repeat;
     box-sizing: border-box;
-    min-height: 65.2vw;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    padding: 9.2vw 6vw 8.5vw;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 7vw 6vw 6vw;
   }
   #contact::before { content: ""; position: absolute; inset: 0; background: rgba(56,56,59,0.43); }
   #contact .inner { position: relative; }
-  #contact h2 { color: #fff; margin: 0 0 2.2vw; }
-  #contact .mail { display: inline-block; font-weight: 500; font-size: 14px; letter-spacing: 0.02em; color: #dcdcdc; text-decoration: none; }
-  #contact .mail:hover { color: #fff; }
-  #contact .social { position: relative; display: flex; gap: 12px; justify-content: center; }
+  #contact h2 { color: #fff; margin: 0 0 1.8vw; }
+  #contact .mail {
+    display: inline-block; font-weight: 500; font-size: max(16px, 1.06vw);
+    letter-spacing: 0.02em; color: #fff; text-decoration: none;
+  }
+  #contact .mail:hover { text-decoration: underline; }
+  #contact .social { position: relative; display: flex; gap: 12px; justify-content: center; margin-top: 3.4vw; }
   #contact .social a { display: block; width: 20px; height: 20px; color: #fff; }
   #contact .social a:hover { opacity: 0.75; }
   #contact .social svg { width: 100%; height: 100%; display: block; fill: currentColor; }
@@ -327,7 +329,7 @@
   <section id="contact">
     <div class="inner">
       <h2>Get in touch.</h2>
-      <a class="mail" href="mailto:hello@guynisbett.com?subject=Enquiry">send email</a>
+      <a class="mail" href="mailto:guy@guynisbett.com?subject=Enquiry">email: guy@guynisbett.com</a>
     </div>
     <div class="social">
       <a href="http://instagram.com/guynisbett" target="_blank" rel="noopener" aria-label="Instagram">
@@ -389,13 +391,22 @@ const NAV = [
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 let layout = null;
 
-function computeLayout(cssW, cssH) {
+function computeLayout(cssW, cssH, ctx) {
   const titleSize = Math.min(cssW * 0.088, cssH * 0.14, 118);
   const navSize   = Math.max(10, titleSize * 0.115);
   const cx = cssW / 2, cy = cssH / 2;
-  const titleY = cy - titleSize * 0.18;
-  const navY   = titleY + titleSize * 0.62;   /* where the strapline used to sit */
-  return { cx, titleY, navY, titleSize, navSize };
+  /* FILM DIRECTOR sized so its width matches GUY NISBETT exactly */
+  ctx.font = '700 ' + titleSize + 'px ' + FONT;
+  const w1 = ctx.measureText('GUY NISBETT').width;
+  ctx.font = '700 ' + titleSize + 'px ' + FONT;
+  const w2raw = ctx.measureText('FILM DIRECTOR').width;
+  const subSize = titleSize * (w1 / Math.max(1, w2raw));
+  const gap = titleSize * 0.16;
+  const groupH = titleSize * 0.72 + gap + subSize * 0.72;  /* cap heights */
+  const titleY = cy - groupH / 2 + titleSize * 0.72;       /* baseline of line 1 */
+  const subY   = titleY + gap + subSize * 0.72;            /* baseline of line 2 */
+  const navY   = subY + titleSize * 0.55;
+  return { cx, titleY, subY, navY, titleSize, subSize, navSize };
 }
 
 function navPositions(ctx, L) {
@@ -458,7 +469,7 @@ function paintScene(idx, cssW, cssH, dpr) {
   }
 
   try {
-  const L = layout = computeLayout(cssW, cssH);
+  const L = layout = computeLayout(cssW, cssH, ctx);
 
   /* ink colour flips black/white against the photo behind the type block */
   const blockLum = sampleLum(cssW * 0.2, L.titleY - L.titleSize, cssW * 0.6, L.titleSize * 2.4, dpr);
@@ -478,6 +489,8 @@ function paintScene(idx, cssW, cssH, dpr) {
   gx.font = '700 ' + L.titleSize + 'px ' + FONT;
   gx.fillStyle = '#ffffff';
   gx.fillText('GUY NISBETT', L.cx, L.titleY);
+  gx.font = '700 ' + L.subSize + 'px ' + FONT;
+  gx.fillText('FILM DIRECTOR', L.cx, L.subY);
   if (g && g.img && g.img.naturalWidth) {
     /* cheap strong blur: bounce the cover-fit photo through a tiny canvas */
     const f = Math.max(2, GLASS.down);
