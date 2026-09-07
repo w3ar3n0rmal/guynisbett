@@ -447,7 +447,18 @@ function unlockAndScroll(sel) {
   document.documentElement.classList.add('scrollable');
   requestAnimationFrame(() => {
     const el = document.querySelector(sel);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!el) return;
+    const from = window.scrollY;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    /* if the smooth animation is throttled away (hidden tab, odd browser
+       state), don't leave the link looking dead — jump */
+    setTimeout(() => {
+      if (Math.abs(window.scrollY - from) < 2) {
+        document.documentElement.style.scrollBehavior = 'auto';
+        el.scrollIntoView({ block: 'start' });
+        document.documentElement.style.scrollBehavior = '';
+      }
+    }, 700);
   });
 }
 document.querySelectorAll('.heronav a, footer a, #work a').forEach(a => {
