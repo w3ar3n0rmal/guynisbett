@@ -21,8 +21,6 @@
   }
   html, body { margin: 0; padding: 0; background: var(--grey-mid); }
   html { scroll-behavior: smooth; }
-  /* the page is locked to the hero until a nav link is used */
-  html:not(.scrollable), html:not(.scrollable) body { height: 100%; overflow: hidden; }
   body { font-family: var(--font); color: var(--dim); -webkit-font-smoothing: antialiased; }
 
   /* ---------- hero: showreel streaming from Vimeo ----------
@@ -45,28 +43,20 @@
     transform: translate(-50%, -50%);
     border: 0; pointer-events: none;
   }
-  #hero .mark {
+  /* the wordmark is a full-hero overlay masked to the text shape (mask
+     painted by JS with the real webfont): inside the letters the reel shows
+     through blurred and darkened — tunables in window.MARK */
+  #hero .glassmark {
     position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    mix-blend-mode: difference; color: #fff; opacity: 0.9;
     pointer-events: none;
-    font-weight: 700; line-height: 1; text-align: center; white-space: nowrap;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    background: rgba(20, 20, 22, 0.25);   /* keeps letters visible pre-filter */
   }
-  #hero .l1 { font-size: var(--t1, 10vw); }
-  #hero .l2 { font-size: var(--t2, 8.4vw); margin-top: 0.18em; }
-  #hero .heronav {
-    display: flex; gap: 2.4em; margin-top: 2.2em;
-    font-size: var(--tn, 12px); font-weight: 700; letter-spacing: 0.3em;
-    opacity: 0; visibility: hidden; pointer-events: none;
-    transition: opacity 0.8s ease;
+  #hero .srtitle {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
   }
-  #hero .heronav.on { opacity: 1; visibility: visible; pointer-events: auto; }
-  #hero .heronav a {
-    color: #fff; text-decoration: none; padding: 10px 4px; margin: -10px -4px;
-    -webkit-tap-highlight-color: transparent;
-  }
-  #hero .heronav a:hover { text-decoration: underline; text-underline-offset: 5px; }
-  #hero .heronav a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
   /* ---------- shared section chrome ----------
      everything below is transcribed from the live Squarespace original,
@@ -130,6 +120,12 @@
     letter-spacing: 0.02em; color: #fff; text-decoration: none;
   }
   #contact .mail:hover { text-decoration: underline; }
+  #contact .ai-note {
+    margin: 2.2vw 0 0; font-size: max(13px, 0.82vw); line-height: 1.55;
+    color: #dcdcdc;
+  }
+  #contact .ai-note a { color: #fff; text-decoration: none; font-weight: 500; }
+  #contact .ai-note a:hover { text-decoration: underline; }
   #contact .social { position: relative; display: flex; gap: 12px; justify-content: center; margin-top: 3.4vw; }
   #contact .social a { display: block; width: 20px; height: 20px; color: #fff; }
   #contact .social a:hover { opacity: 0.75; }
@@ -155,16 +151,8 @@
     <iframe id="reel" src="https://player.vimeo.com/video/1224682030?background=1&autoplay=1&loop=1&muted=1&autopause=0&app_id=58479"
       allow="autoplay; fullscreen" title="Guy Nisbett — Showreel"></iframe>
   </div>
-  <div class="mark" aria-label="Guy Nisbett — Film Director">
-    <span class="l1">GUY NISBETT</span>
-    <span class="l2">FILM DIRECTOR</span>
-    <nav class="heronav" id="heronav">
-      <a href="#about">ABOUT</a>
-      <a href="#work">WORK</a>
-      <a href="blog/">BLOG</a>
-      <a href="#contact">CONTACT</a>
-    </nav>
-  </div>
+  <div class="glassmark" id="glassmark" aria-hidden="true"></div>
+  <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
 </div>
 
 <main>
@@ -367,6 +355,8 @@
     <div class="inner">
       <h2>Get in touch.</h2>
       <a class="mail" href="mailto:guy@guynisbett.com?subject=Enquiry">email: guy@guynisbett.com</a>
+      <p class="ai-note">For all AI enquiries, please see NORMAL:<br>
+        <a href="https://wearenormal.ai" target="_blank" rel="noopener">wearenormal.ai</a></p>
     </div>
     <div class="social">
       <a href="http://instagram.com/guynisbett" target="_blank" rel="noopener" aria-label="Instagram">
@@ -392,35 +382,57 @@
 'use strict';
 
 /* =========================================================================
-   Video hero (2026-09-07): the showreel streams from Vimeo in background
-   mode over its own first frame. The two-line wordmark is DOM text in
-   difference blend; FILM DIRECTOR is sized at runtime so its width exactly
-   matches GUY NISBETT (same rule as the old canvas wordmark). Nav fades in
-   on first interaction; page scroll stays locked until a nav link is used.
+   Hero v2 (2026-09-07): free-scrolling page, no nav in the hero.
+   The wordmark is a full-hero overlay whose mask is painted onto a canvas
+   with the real webfont (GUY NISBETT / FILM DIRECTOR, second line width-
+   matched to the first); inside the letters, backdrop-filter shows the reel
+   blurred and darkened. Tunables: window.MARK = { blur, dark } — call
+   __markRepaint() after changing them.
    ========================================================================= */
 
 const hero = document.getElementById('hero');
 const videobg = document.getElementById('videobg');
 const reel = document.getElementById('reel');
-const heronav = document.getElementById('heronav');
+const glass = document.getElementById('glassmark');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
-/* ---------- wordmark sizing ---------- */
-const meas = document.createElement('canvas').getContext('2d');
-function sizeMark() {
+const MARK = window.MARK = { blur: 18, dark: 0.55 };
+
+function paintMask() {
   const w = hero.clientWidth, h = hero.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  const x = c.getContext('2d');
+  x.scale(dpr, dpr);
   const t1 = Math.min(w * 0.088, h * 0.14, 118);
-  meas.font = '700 ' + t1 + 'px ' + FONT;
-  const w1 = meas.measureText('GUY NISBETT').width;
-  const w2 = meas.measureText('FILM DIRECTOR').width;
-  const t2 = t1 * (w1 / Math.max(1, w2));
-  hero.style.setProperty('--t1', t1 + 'px');
-  hero.style.setProperty('--t2', t2 + 'px');
-  hero.style.setProperty('--tn', Math.max(10, t1 * 0.115) + 'px');
+  x.font = '700 ' + t1 + 'px ' + FONT;
+  const w1 = x.measureText('GUY NISBETT').width;
+  const w2r = x.measureText('FILM DIRECTOR').width;
+  const t2 = t1 * (w1 / Math.max(1, w2r));
+  const gap = t1 * 0.18;
+  const groupH = t1 * 0.72 + gap + t2 * 0.72;
+  const y1 = h / 2 - groupH / 2 + t1 * 0.72;
+  const y2 = y1 + gap + t2 * 0.72;
+  x.textAlign = 'center';
+  x.textBaseline = 'alphabetic';
+  x.fillStyle = '#fff';
+  x.fillText('GUY NISBETT', w / 2, y1);
+  x.font = '700 ' + t2 + 'px ' + FONT;
+  x.fillText('FILM DIRECTOR', w / 2, y2);
+  const url = 'url(' + c.toDataURL('image/png') + ')';
+  glass.style.webkitMaskImage = url;
+  glass.style.maskImage = url;
+  const f = 'blur(' + MARK.blur + 'px) brightness(' + MARK.dark + ')';
+  glass.style.webkitBackdropFilter = f;
+  glass.style.backdropFilter = f;
 }
-sizeMark();
-window.addEventListener('resize', sizeMark);
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeMark);
+window.__markRepaint = paintMask;
+paintMask();
+let rT = 0;
+window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(paintMask, 120); });
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(paintMask);
 
 /* ---------- video fade-in over the poster ---------- */
 let faded = false;
@@ -430,58 +442,14 @@ function showVideo() {
   setTimeout(() => videobg.classList.add('on'), 500);
 }
 reel.addEventListener('load', showVideo);
-setTimeout(showVideo, 4000);   /* belt and braces if load never fires */
+setTimeout(showVideo, 4000);
 
-/* ---------- nav reveal on first interaction ---------- */
-let revealed = false;
-function reveal() {
-  if (revealed) return;
-  revealed = true;
-  heronav.classList.add('on');
-}
-['pointerdown', 'wheel', 'keydown', 'touchmove'].forEach(ev =>
-  window.addEventListener(ev, reveal, { passive: true, once: false }));
-
-/* ---------- scroll lock until a nav link is used ---------- */
-function unlockAndScroll(sel) {
-  document.documentElement.classList.add('scrollable');
-  requestAnimationFrame(() => {
-    const el = document.querySelector(sel);
-    if (!el) return;
-    const from = window.scrollY;
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    /* if the smooth animation is throttled away (hidden tab, odd browser
-       state), don't leave the link looking dead — jump */
-    setTimeout(() => {
-      if (Math.abs(window.scrollY - from) < 2) {
-        document.documentElement.style.scrollBehavior = 'auto';
-        el.scrollIntoView({ block: 'start' });
-        document.documentElement.style.scrollBehavior = '';
-      }
-    }, 700);
-  });
-}
-document.querySelectorAll('.heronav a, footer a, #work a').forEach(a => {
-  const href = a.getAttribute('href') || '';
-  if (href.startsWith('#') && href.length > 1) {
-    a.addEventListener('click', (e) => { e.preventDefault(); unlockAndScroll(href); });
-  }
-});
+/* ---------- footer Home link back to the top ---------- */
 const homeLink = document.getElementById('homeLink');
 if (homeLink) homeLink.addEventListener('click', (e) => {
   e.preventDefault();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
-
-/* arriving from the blog with a section hash: skip the intro */
-if (['#about', '#work', '#contact'].includes(location.hash)) {
-  reveal();
-  document.documentElement.style.scrollBehavior = 'auto';
-  unlockAndScroll(location.hash);
-  setTimeout(() => { document.documentElement.style.scrollBehavior = ''; }, 100);
-} else if (location.hash === '#home') {
-  reveal();
-}
 })();
 </script>
 </body>
