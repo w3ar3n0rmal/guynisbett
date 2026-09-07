@@ -57,6 +57,24 @@
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
   }
+  #hero .scrollcue {
+    position: absolute; left: 50%; bottom: max(22px, 3.4svh);
+    transform: translateX(-50%);
+    width: 30px; height: 30px; padding: 12px; margin: -12px;
+    color: #fff; opacity: 0.55;
+    animation: cue-pulse 2.6s ease-in-out infinite;
+    transition: opacity 0.5s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #hero .scrollcue svg { width: 100%; height: 100%; display: block; }
+  #hero .scrollcue.gone { opacity: 0; pointer-events: none; animation: none; }
+  @keyframes cue-pulse {
+    0%, 100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
+    50% { opacity: 0.85; transform: translateX(-50%) translateY(6px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #hero .scrollcue { animation: none; opacity: 0.6; }
+  }
 
   /* ---------- shared section chrome ----------
      everything below is transcribed from the live Squarespace original,
@@ -153,6 +171,9 @@
   </div>
   <div class="glassmark" id="glassmark" aria-hidden="true"></div>
   <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
+  <a class="scrollcue" id="scrollcue" href="#about" aria-label="Scroll down">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l8 8 8-8"/></svg>
+  </a>
 </div>
 
 <main>
@@ -396,7 +417,7 @@ const reel = document.getElementById('reel');
 const glass = document.getElementById('glassmark');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
-const MARK = window.MARK = { blur: 18, dark: 0.55, alpha: 0.85 };
+const MARK = window.MARK = { blur: 8, dark: 0.85, alpha: 0.8 };
 
 function paintMask() {
   const w = hero.clientWidth, h = hero.clientHeight;
@@ -406,21 +427,23 @@ function paintMask() {
   c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
   const x = c.getContext('2d');
   x.scale(dpr, dpr);
-  const t1 = Math.min(w * 0.088, h * 0.14, 118);
+  /* top-left, half the old hero scale */
+  const t1 = Math.max(22, Math.min(w * 0.044, h * 0.07, 59));
   x.font = '700 ' + t1 + 'px ' + FONT;
   const w1 = x.measureText('GUY NISBETT').width;
   const w2r = x.measureText('FILM DIRECTOR').width;
   const t2 = t1 * (w1 / Math.max(1, w2r));
   const gap = t1 * 0.18;
-  const groupH = t1 * 0.72 + gap + t2 * 0.72;
-  const y1 = h / 2 - groupH / 2 + t1 * 0.72;
+  const mx = Math.max(20, w * 0.03);
+  const my = Math.max(20, w * 0.03);
+  const y1 = my + t1 * 0.72;
   const y2 = y1 + gap + t2 * 0.72;
-  x.textAlign = 'center';
+  x.textAlign = 'left';
   x.textBaseline = 'alphabetic';
   x.fillStyle = '#fff';
-  x.fillText('GUY NISBETT', w / 2, y1);
+  x.fillText('GUY NISBETT', mx, y1);
   x.font = '700 ' + t2 + 'px ' + FONT;
-  x.fillText('FILM DIRECTOR', w / 2, y2);
+  x.fillText('FILM DIRECTOR', mx, y2);
   const url = 'url(' + c.toDataURL('image/png') + ')';
   glass.style.webkitMaskImage = url;
   glass.style.maskImage = url;
@@ -444,6 +467,12 @@ function showVideo() {
 }
 reel.addEventListener('load', showVideo);
 setTimeout(showVideo, 4000);
+
+/* ---------- scroll cue: pulses until the visitor moves ---------- */
+const cue = document.getElementById('scrollcue');
+window.addEventListener('scroll', () => {
+  cue.classList.toggle('gone', window.scrollY > 40);
+}, { passive: true });
 
 /* ---------- footer Home link back to the top ---------- */
 const homeLink = document.getElementById('homeLink');
