@@ -396,7 +396,7 @@ const reel = document.getElementById('reel');
 const glass = document.getElementById('glassmark');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
-const MARK = window.MARK = { blur: 18, dark: 0.55 };
+const MARK = window.MARK = { blur: 18, dark: 0.55, alpha: 0.85 };
 
 function paintMask() {
   const w = hero.clientWidth, h = hero.clientHeight;
@@ -427,6 +427,7 @@ function paintMask() {
   const f = 'blur(' + MARK.blur + 'px) brightness(' + MARK.dark + ')';
   glass.style.webkitBackdropFilter = f;
   glass.style.backdropFilter = f;
+  glass.style.opacity = MARK.alpha;
 }
 window.__markRepaint = paintMask;
 paintMask();
