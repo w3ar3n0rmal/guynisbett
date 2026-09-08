@@ -455,10 +455,16 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
      navBoost brightness multiplier on the nav word under the pointer. This
               works again now: the resting state is a modest grade rather than a
               maximal negative, so there is headroom to push into. */
+/* Settled by Guy in the console, 2026-09-08. Departures from the raw Fusion
+   figures, both deliberate: invert nudged 0.126 -> 0.16, and alpha up to 0.9,
+   because the browser has to hold up across a whole 60s reel rather than the
+   one plate the comp was graded against. navBoost 3 is a hard flare on the
+   rollover — brightness 1.38 x 3 blows the hovered word out, which is the
+   point of it. */
 const MARK = window.MARK = {
-  blur: 2, bright: 1.38, saturate: 0.81, contrast: 1, invert: 0.126, hue: 0,
-  tint: 0.05, alpha: 0.5,
-  navBoost: 1.35, navTrack: 0
+  blur: 2, bright: 1.38, saturate: 0.81, contrast: 1, invert: 0.16, hue: 0,
+  tint: 0.05, alpha: 0.9,
+  navBoost: 3, navTrack: 0
 };
 
 function markFilter(boost) {
