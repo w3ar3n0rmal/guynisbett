@@ -47,6 +47,20 @@
   }
   #hero .videobg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease; }
   #hero .videobg.on { opacity: 1; }
+  /* Shown on the poster until the reel actually starts rendering frames.
+     Bottom-left on the wordmark's own margin, clear of the centre scroll cue. */
+  #hero .loading {
+    position: absolute; left: max(20px, 3vw); bottom: max(10px, 2.4svh);
+    margin: 0; font-size: max(11px, 0.82vw); font-weight: 700;
+    letter-spacing: 0.18em; color: #fff;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+  }
+  #hero .loading.show { animation: loading-pulse 1.5s ease-in-out infinite; }
+  @keyframes loading-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+  @media (prefers-reduced-motion: reduce) {
+    #hero .loading.show { animation: none; opacity: 0.7; }
+  }
   #hero .videobg iframe {
     position: absolute; top: 50%; left: 50%;
     width: max(100vw, 177.78svh); height: max(100svh, 56.25vw);
@@ -241,6 +255,7 @@
     <iframe id="reel" src="https://player.vimeo.com/video/1224682030?background=1&autoplay=1&loop=1&muted=1&autopause=0&app_id=58479"
       allow="autoplay; fullscreen" title="Guy Nisbett — Showreel"></iframe>
   </div>
+  <p class="loading" id="loading" role="status" aria-live="polite">LOADING</p>
   <div class="glassmark" id="glassmark" aria-hidden="true"></div>
   <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
   <a class="scrollcue" id="scrollcue" href="#about" aria-label="Scroll down">
@@ -706,15 +721,55 @@ if (document.fonts && document.fonts.ready) document.fonts.ready.then(paintMask)
    window is resized. */
 if (window.ResizeObserver) new ResizeObserver(repaintSoon).observe(hero);
 
-/* ---------- video fade-in over the poster ---------- */
+/* =========================================================================
+   Video fade-in over the poster, and the LOADING state.
+
+   The reel takes a few seconds to start — longer on a slow line — and this
+   used to reveal it on a blind 4s timer, so the fade could happen before
+   Vimeo was rendering anything. Now it listens to the player itself over
+   postMessage (no player.js needed) and reveals on the first frame actually
+   played. `timeupdate` with seconds > 0 is the honest signal; `play` fires
+   before pixels exist.
+
+   ⚠️ Two guarantees, because a stuck LOADING is worse than no LOADING:
+     - it only appears after LOADING_AFTER, so a fast start never flashes it
+     - REVEAL_BY reveals the video and clears the label regardless, if the
+       player never talks back to us (blocked messaging, an API change) */
+const LOADING_AFTER = 600;    /* don't flash the label on a fast connection */
+const REVEAL_BY = 6000;       /* hard backstop; was an unconditional 4000 */
+
+const loading = document.getElementById('loading');
 let faded = false;
+let loadingTimer = setTimeout(() => { if (!faded) loading.classList.add('show'); }, LOADING_AFTER);
+
 function showVideo() {
   if (faded) return;
   faded = true;
-  setTimeout(() => videobg.classList.add('on'), 500);
+  clearTimeout(loadingTimer);
+  loading.classList.remove('show');
+  videobg.classList.add('on');
 }
-reel.addEventListener('load', showVideo);
-setTimeout(showVideo, 4000);
+
+function tellPlayer(msg) {
+  try { reel.contentWindow.postMessage(JSON.stringify(msg), 'https://player.vimeo.com'); }
+  catch (e) { /* cross-origin not ready yet — the load handler retries */ }
+}
+function subscribe() {
+  ['play', 'playing', 'timeupdate'].forEach(
+    ev => tellPlayer({ method: 'addEventListener', value: ev }));
+}
+window.addEventListener('message', (e) => {
+  if (e.origin !== 'https://player.vimeo.com') return;
+  let d = e.data;
+  if (typeof d === 'string') { try { d = JSON.parse(d); } catch (_) { return; } }
+  if (!d || !d.event) return;
+  if (d.event === 'ready') { subscribe(); return; }
+  /* seconds > 0 means frames are on screen, which 'play' alone does not */
+  if (d.event === 'timeupdate' && d.data && d.data.seconds > 0) showVideo();
+});
+reel.addEventListener('load', subscribe);   /* in case 'ready' fired early */
+subscribe();
+setTimeout(showVideo, REVEAL_BY);
 
 /* ---------- scroll cue: pulses until the visitor moves ---------- */
 /* =========================================================================
