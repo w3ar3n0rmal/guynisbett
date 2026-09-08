@@ -743,7 +743,10 @@ if (window.ResizeObserver) new ResizeObserver(repaintSoon).observe(hero);
      - it only appears after LOADING_AFTER, so a fast start never flashes it
      - REVEAL_BY reveals the video and clears the label regardless, if the
        player never talks back to us (blocked messaging, an API change) */
-const LOADING_AFTER = 600;    /* don't flash the label on a fast connection */
+/* Playback genuinely starts around 1.2-1.5s on a fast line, so anything below
+   that makes the label blink on and straight off. It should only appear when
+   there is a real wait — on a fast connection it should never be seen. */
+const LOADING_AFTER = 1400;
 const REVEAL_BY = 6000;       /* hard backstop; was an unconditional 4000 */
 
 const loading = document.getElementById('loading');
