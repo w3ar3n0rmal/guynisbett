@@ -82,9 +82,13 @@
      backdrop-filter with nothing to sample. So the anchor animates the drift
      and the triangle animates its own opacity. */
   #hero .scrollcue {
-    position: absolute; left: 50%; bottom: max(22px, 3.4svh);
+    position: absolute; left: 50%; bottom: max(10px, 2.4svh);
     transform: translateX(-50%);
-    width: 28px; height: 16px; padding: 14px; margin: -14px;
+    /* padding is the hit target. NO negative margin to cancel it: the element
+       is absolutely positioned so the padding pushes nothing around, while
+       translateX(-50%) centres the PADDED box — a -14px margin on top of that
+       just shifts the triangle off centre, which is what the old chevron did. */
+    width: 28px; height: 16px; padding: 14px;
     animation: cue-drift 2.6s ease-in-out infinite;
     -webkit-tap-highlight-color: transparent;
   }
