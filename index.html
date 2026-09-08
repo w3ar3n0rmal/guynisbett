@@ -49,6 +49,7 @@
   #hero .glassmark {
     position: absolute; inset: 0;
     pointer-events: none;
+    opacity: 0;            /* until the mask is painted — see paintMask() */
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
     background: rgba(20, 20, 22, 0.25);   /* keeps letters visible pre-filter */
@@ -62,6 +63,7 @@
   #hero .glassneg {
     position: absolute; inset: 0;
     pointer-events: none;
+    opacity: 0;            /* ditto — unmasked, this would invert the whole hero */
     background: #fff; mix-blend-mode: difference;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
@@ -452,6 +454,9 @@ const NAV = [
   { label: 'BLOG',    href: 'blog/' },
   { label: 'CONTACT', href: '#contact' }
 ];
+/* nothing may be shown until paintMask() has actually run: the layers are
+   unmasked before that, and an unmasked difference layer inverts everything */
+let painted = false;
 const navHiEls = NAV.map(() => {
   const d = document.createElement('div');
   d.className = 'navhi';
@@ -464,7 +469,7 @@ const navEls = NAV.map((nv, i) => {
   a.className = 'hnav';
   a.href = nv.href;
   a.setAttribute('aria-label', nv.label);
-  const on = () => { navHiEls[i].style.opacity = MARK.navHi; };
+  const on = () => { if (painted) navHiEls[i].style.opacity = MARK.navHi; };
   const off = () => { navHiEls[i].style.opacity = 0; };
   a.addEventListener('pointerenter', on);
   a.addEventListener('pointerleave', off);
@@ -581,6 +586,7 @@ function paintMask() {
   gneg.style.webkitMaskImage = url;
   gneg.style.maskImage = url;
   gneg.style.opacity = MARK.neg;
+  painted = true;
 }
 window.__markRepaint = paintMask;
 paintMask();
