@@ -173,19 +173,19 @@
   .film .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
   .film .text { flex: 1; min-width: 0; }
   /* Film details fade up line by line as the block comes into view — the old
-     Squarespace behaviour Guy asked for back: a 36-frame fade (1500ms at 24fps),
-     each line a few frames behind the last.
+     Squarespace behaviour Guy asked for back: a 25-frame fade (~1040ms at 24fps),
+     each line four frames behind the last.
      ⚠️ Scoped to .js and applied only before the reveal: if the script never
      runs, nothing is ever hidden. Never hide content you cannot guarantee
      un-hiding. */
   .js .film .text > * {
     opacity: 0;
-    transition: opacity var(--fade, 1500ms) ease;
+    transition: opacity var(--fade, 1040ms) ease;
   }
   .js .film .text.shown > * { opacity: 1; }
-  .js .film .text > :nth-child(2) { transition-delay: calc(var(--stagger, 250ms) * 1); }
-  .js .film .text > :nth-child(3) { transition-delay: calc(var(--stagger, 250ms) * 2); }
-  .js .film .text > :nth-child(4) { transition-delay: calc(var(--stagger, 250ms) * 3); }
+  .js .film .text > :nth-child(2) { transition-delay: calc(var(--stagger, 165ms) * 1); }
+  .js .film .text > :nth-child(3) { transition-delay: calc(var(--stagger, 165ms) * 2); }
+  .js .film .text > :nth-child(4) { transition-delay: calc(var(--stagger, 165ms) * 3); }
   @media (prefers-reduced-motion: reduce) {
     .js .film .text > * { opacity: 1; transition: none; transition-delay: 0s; }
   }
@@ -724,9 +724,10 @@ setTimeout(showVideo, 4000);
 /* ---------- scroll cue: pulses until the visitor moves ---------- */
 /* =========================================================================
    Film details reveal: fade each line up once its block is on screen.
-   FADE/STAGGER are in FRAMES at 24fps, which is how Guy specified it (36).
+   Durations are in FRAMES at 24fps, which is how Guy specifies them. Started at
+   36/6, taken 30% faster to 25/4 on 2026-09-08.
    ========================================================================= */
-const REVEAL = window.REVEAL = { fadeFrames: 36, staggerFrames: 6, fps: 24 };
+const REVEAL = window.REVEAL = { fadeFrames: 25, staggerFrames: 4, fps: 24 };
 (function revealFilms() {
   const blocks = document.querySelectorAll('.film .text');
   if (!blocks.length) return;
