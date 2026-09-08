@@ -565,7 +565,8 @@ function paintMask() {
   /* top-left, half the old hero scale + 20% (2026-09-07) */
   const t1 = Math.max(26, Math.min(w * 0.0528, h * 0.084, 71));
   x.font = '700 ' + t1 + 'px ' + FONT;
-  const w1 = x.measureText('GUY NISBETT').width;
+  const m1 = x.measureText('GUY NISBETT');
+  const w1 = m1.width;
   const w2r = x.measureText('FILM DIRECTOR').width;
   const t2 = t1 * (w1 / Math.max(1, w2r));
   const gap = t1 * 0.18;
@@ -580,21 +581,31 @@ function paintMask() {
   x.font = '700 ' + t2 + 'px ' + FONT;
   x.fillText('FILM DIRECTOR', mx, y2);
 
+  /* where the caps of GUY NISBETT actually start. Measured rather than assumed:
+     the 0.72 above is an approximation of the cap-height ratio, and any error in
+     it scales with font size — so aligning the much smaller nav by the same
+     constant would leave the two visibly out. */
+  const capTop = y1 - (m1.actualBoundingBoxAscent || t1 * 0.72);
+
   /* snapshot before the nav goes in: .glassneg carries the negative for the
      WORDMARK ONLY — each nav word carries its own, so a rollover can vary it */
   const wordmarkURL = 'url(' + c.toDataURL('image/png') + ')';
 
-  /* nav: top-right row on the GUY NISBETT baseline, stacked and right-aligned
+  /* nav: top-right, its cap tops aligned with GUY NISBETT's (Guy, 2026-09-08 —
+     it used to share the wordmark's BASELINE, which sat the small type low).
+     Stacked and right-aligned
      on narrow screens. Only MEASURED here — each word is masked and filtered
      by its own .navhi layer (see paintNavHighlights), which is what lets a
      rollover change one word without disturbing the others */
   const navSize = Math.max(11, t1 * 0.24);
   x.font = '700 ' + navSize + 'px ' + FONT;
   if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
+  /* baseline that puts the nav's cap top on capTop */
+  const navY = capTop + (x.measureText('ABOUT').actualBoundingBoxAscent || navSize * 0.72);
   const rects = [];
   const stacked = w <= 640;
   if (stacked) {
-    let yy = y1;
+    let yy = navY;
     for (const nv of NAV) {
       const ww = x.measureText(nv.label).width;
       x.textAlign = 'right';
@@ -607,7 +618,7 @@ function paintMask() {
     const widths = NAV.map(nv => x.measureText(nv.label).width);
     let xx = w - mx - widths.reduce((a, b) => a + b, 0) - gap * (NAV.length - 1);
     NAV.forEach((nv, i) => {
-      rects.push({ x: xx, y: y1 - navSize, w: widths[i], h: navSize * 1.4 });
+      rects.push({ x: xx, y: navY - navSize, w: widths[i], h: navSize * 1.4 });
       xx += widths[i] + gap;
     });
   }
