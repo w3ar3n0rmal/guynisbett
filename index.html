@@ -449,8 +449,10 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
    mid grey, which is what 0.35 was doing.
      blur/dark = the glass itself   tint = white lift, the ground-glass feel
      alpha     = glass opacity      neg  = strength of the negative
-     navHi     = extra negative under a nav rollover */
-const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.6 };
+     navHi     = extra negative under a nav rollover
+     navTrack  = nav letter-spacing in em (0 = normal; the wide 0.28 was for
+                 the spread-out layout, not for the words sitting in the corner) */
+const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.6, navTrack: 0 };
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -507,7 +509,7 @@ function paintNavHighlights(rects, navSize, dpr) {
     const x = c.getContext('2d');
     x.scale(dpr, dpr);
     x.font = '700 ' + navSize + 'px ' + FONT;
-    if ('letterSpacing' in x) x.letterSpacing = '0.28em';
+    if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
     x.textAlign = 'left';
     x.textBaseline = 'alphabetic';
     x.fillStyle = '#fff';
@@ -553,7 +555,7 @@ function paintMask() {
      right-aligned on narrow screens */
   const navSize = Math.max(11, t1 * 0.24);
   x.font = '700 ' + navSize + 'px ' + FONT;
-  if ('letterSpacing' in x) x.letterSpacing = '0.28em';
+  if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
   const rects = [];
   const stacked = w <= 640;
   if (stacked) {
