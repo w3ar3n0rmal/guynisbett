@@ -52,7 +52,8 @@
     opacity: 0;            /* until the mask is painted — see paintMask() */
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-    background: rgba(20, 20, 22, 0.25);   /* keeps letters visible pre-filter */
+    /* background is a white lift (MARK.tint), set by paintMask — the old dark
+       wash flattened the letters to grey and killed the translucency */
   }
   /* negative layer: white through the same mask, difference-blended, so the
      letters are the photographic negative of whatever is behind them at
@@ -442,9 +443,14 @@ const glass = document.getElementById('glassmark');
 const gneg = document.getElementById('glassneg');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
-/* neg  = opacity of the inverted underlay (legibility on any frame)
-   navHi = opacity the same inversion reaches under a nav rollover */
-const MARK = window.MARK = { blur: 8, dark: 0.85, alpha: 0.8, neg: 0.35, navHi: 0.6 };
+/* Settled on the V3 water landing's proportions (GLASS: down 14, tint 0.12,
+   alpha 0.65, diff 0.85) — a STRONG difference with a translucent glass over
+   it. Note neg must stay high: a difference layer at ~0.5 maps everything to
+   mid grey, which is what 0.35 was doing.
+     blur/dark = the glass itself   tint = white lift, the ground-glass feel
+     alpha     = glass opacity      neg  = strength of the negative
+     navHi     = extra negative under a nav rollover */
+const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.6 };
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -579,6 +585,7 @@ function paintMask() {
   const f = 'blur(' + MARK.blur + 'px) brightness(' + MARK.dark + ')';
   glass.style.webkitBackdropFilter = f;
   glass.style.backdropFilter = f;
+  glass.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
   glass.style.opacity = MARK.alpha;
   /* the negative sits ON TOP of the glass, so what it inverts is the already
      blurred and darkened result — that is what makes it self-correcting */
