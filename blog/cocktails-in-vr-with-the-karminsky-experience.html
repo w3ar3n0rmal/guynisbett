@@ -15,7 +15,10 @@
          -webkit-font-smoothing:antialiased; }
   header.site { padding:24px 4vw; display:flex; justify-content:space-between; align-items:center; }
   header.site .mark { font-weight:700; font-size:15px; letter-spacing:0.14em; color:#fff; text-decoration:none; }
-  header.site .back { font-size:11px; font-weight:700; letter-spacing:0.18em;
+  /* sized to match the hero nav exactly: that is max(11, t1*0.24) where
+     t1 = max(26, min(5.28vw, 8.4svh, 71px)) — the 0.24 folded into each term */
+  header.site .back { font-size:max(11px, min(1.2672vw, 2.016svh, 17.04px));
+                      font-weight:700; letter-spacing:0.18em;
                       color:#fff; text-decoration:none; opacity:0.85; }
   header.site .back:hover { opacity:1; }
   header.site .back .chev { margin-right:0.5em; display:inline-block; }
