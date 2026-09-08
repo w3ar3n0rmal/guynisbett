@@ -44,18 +44,16 @@
     border: 0; pointer-events: none;
   }
   /* The mark is made of MASKED BACKDROP-FILTER LAYERS: .glassmark holds the
-     wordmark, and one .navhi holds each nav word. Each layer filters only the
-     reel inside its own glyphs — blurred (glass), luminance-inverted so the
-     letters push away from whatever is behind them, and hue-rotated 180deg to
-     put the colour back, since invert() flips hue as well as luminance and
-     without the rotation the type reads as a colour negative.
+     wordmark, and one .navhi holds each nav word. Each filters only the reel
+     inside its own glyphs — blurred, lifted and slightly desaturated, with a
+     touch of inversion. The values come from Guy's Fusion comp; see MARK.
 
      ⚠️ The layers must mask DISJOINT regions. Two backdrop-filter layers over
      the same pixels do not compose — the second barely registers, which is
-     what made the first attempt at this look flat (2026-09-08). That is also
-     why the negative is part of this chain rather than a difference layer
-     over the top: mix-blend-mode: difference cannot be hue-corrected, so it
-     inverts the colour too. */
+     what made an earlier attempt look flat (2026-09-08). That is also why the
+     inversion is part of this chain rather than a mix-blend-mode: difference
+     layer over the top: a blend result has no filter hook in CSS, so it can
+     never be hue-corrected and always inverts the colour too. */
   #hero .glassmark, #hero .navhi {
     position: absolute;
     pointer-events: none;
@@ -427,42 +425,52 @@ const glass = document.getElementById('glassmark');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* ---- the numbers, all live-tunable: change and call __markRepaint() ----
-   Proportions started from the V3 water landing (down 14, tint 0.12,
-   alpha 0.65, diff 0.85).
+   Read off Guy's Fusion comp (standalone Fusion 20, 2026-09-08), which is the
+   reference for this look:
 
-     blur    px   the glass itself — how far the reel smears inside the letters
-     invert  0..1 luminance inversion; this is what makes the type read on a
-                  black frame and a blown-out one alike. ⚠️ Keep it HIGH or at
-                  0: around 0.5 it maps everything to mid grey, which is what
-                  made the type look flat and dead.
-     hue     deg  rotated after invert to put the colour back — invert() flips
-                  hue as well as luminance, and without this the type reads as
-                  a colour negative
-     bright  1=off   contrast 1=off    saturate 1=off
-     tint    0..1 white lift painted inside the letters — the ground-glass feel
-     alpha   0..1 opacity of the whole mark: the lower it is, the more the
-                  untouched reel shows through and the glassier it reads
+     Loader (Showreel V4, 3840x2160)
+       -> Blur          Fast Gaussian, size 5.5, 4 passes
+       -> BrightnessContrast   Gain 1.38, Brightness +0.05, Saturation 0.81
+       -> Merge, ApplyMode Difference, Blend 0.126, fg Gain 0.496,
+          fg = the same blurred plate hue-shifted -0.56 so the difference
+          does not invert the hue
+     ...all of it masked by TYPE still.png.
 
-     navInvert / navDim — the same inversion on the nav words: hovering one
-     holds it at navInvert and drops the other three to navDim. It has to work
-     that way round; see the note above .navhi in the CSS.
-     navTrack  nav letter-spacing in em. */
+   Translating each one:
+     blur     5.5px at 3840 wide is 0.14% of frame width — about 2 CSS px at a
+              1280 viewport, NOT the 14 that made this look like a grey slab.
+     bright   = Fusion's Gain. This is what actually does the work: the letters
+              read because they are LIFTED, not because they are inverted.
+     tint     = Fusion's additive Brightness (+0.05), as a white lift — CSS
+              brightness() is multiply-only so it cannot add.
+     saturate = Fusion's Saturation.
+     invert   = the Merge's Difference blend, 0.126. A TOUCH. Guy's note: a hint
+              of difference in the luminance, not in the hue.
+     hue      ⚠️ leave at 0 while invert is low. invert() only flips hue as it
+              approaches 1, and that is the only time hue-rotate(180) corrects
+              anything — at invert 0.126 a 180 rotation would wreck the hue of
+              the 87% that was never inverted. Guy does the equivalent in Fusion
+              with the -0.56 hue shift on the difference input.
+     alpha    opacity of the whole mark; lower = glassier, more untouched reel.
+     navBoost brightness multiplier on the nav word under the pointer. This
+              works again now: the resting state is a modest grade rather than a
+              maximal negative, so there is headroom to push into. */
 const MARK = window.MARK = {
-  blur: 14, invert: 0.85, hue: 180, bright: 1, contrast: 1, saturate: 1,
-  tint: 0.12, alpha: 0.65,
-  navInvert: 0.85, navDim: 0.2, navTrack: 0
+  blur: 2, bright: 1.38, saturate: 0.81, contrast: 1, invert: 0.126, hue: 0,
+  tint: 0.05, alpha: 0.5,
+  navBoost: 1.35, navTrack: 0
 };
 
-function markFilter(invert) {
+function markFilter(boost) {
   return 'blur(' + MARK.blur + 'px)'
-       + ' invert(' + invert + ')'
-       + ' hue-rotate(' + MARK.hue + 'deg)'
-       + ' brightness(' + MARK.bright + ')'
+       + ' brightness(' + (MARK.bright * (boost || 1)) + ')'
+       + ' saturate(' + MARK.saturate + ')'
        + ' contrast(' + MARK.contrast + ')'
-       + ' saturate(' + MARK.saturate + ')';
+       + ' invert(' + MARK.invert + ')'
+       + (MARK.hue ? ' hue-rotate(' + MARK.hue + 'deg)' : '');
 }
-function applyFilter(el, invert) {
-  const f = markFilter(invert);
+function applyFilter(el, boost) {
+  const f = markFilter(boost);
   el.style.webkitBackdropFilter = f;
   el.style.backdropFilter = f;
 }
@@ -490,14 +498,8 @@ const navEls = NAV.map((nv, i) => {
   a.className = 'hnav';
   a.href = nv.href;
   a.setAttribute('aria-label', nv.label);
-  const on = () => {
-    if (!painted) return;
-    navHiEls.forEach((e, j) => applyFilter(e, j === i ? MARK.navInvert : MARK.navDim));
-  };
-  const off = () => {
-    if (!painted) return;
-    navHiEls.forEach(e => applyFilter(e, MARK.navInvert));
-  };
+  const on = () => { if (painted) applyFilter(navHiEls[i], MARK.navBoost); };
+  const off = () => { if (painted) applyFilter(navHiEls[i], 1); };
   a.addEventListener('pointerenter', on);
   a.addEventListener('pointerleave', off);
   a.addEventListener('focus', on);
@@ -542,7 +544,7 @@ function paintNavHighlights(rects, navSize, dpr) {
     st.height = ch + 'px';
     st.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
     st.opacity = MARK.alpha;
-    applyFilter(navHiEls[i], MARK.navInvert);
+    applyFilter(navHiEls[i], 1);
   });
 }
 
@@ -610,7 +612,7 @@ function paintMask() {
      by their own .navhi layers, so no two backdrop-filters ever overlap */
   glass.style.webkitMaskImage = wordmarkURL;
   glass.style.maskImage = wordmarkURL;
-  applyFilter(glass, MARK.invert);
+  applyFilter(glass, 1);
   glass.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
   glass.style.opacity = MARK.alpha;
   painted = true;
