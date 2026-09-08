@@ -4,6 +4,8 @@
 <title>Working from home — GUY NISBETT</title>
 <link rel="icon" type="image/png" href="../assets/img/browser-icon.png">
 <link rel="stylesheet" href="https://use.typekit.net/dyw6xci.css">
+
+
 <style>
   /* transcribed from the live Squarespace blog at a 1702px viewport:
      ground #A8A6A1, white text; post column 46vw centred, title 12px bold,
@@ -52,6 +54,20 @@
     .row { display:block; margin-bottom:12vw; }
     .row img { width:100%; height:auto; aspect-ratio:1/1; margin-bottom:16px; }
   }
+
+  /* ---------- single film page ---------- */
+  main.filmpage { width:min(76vw,92%); margin:0 auto; padding:2vw 0 6vw; }
+  main.filmpage .embed { position:relative; width:100%; aspect-ratio:16/9; background:#000; margin-bottom:2.4vw; }
+  main.filmpage .embed iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+  main.filmpage h1 { font-size:max(28px,2.983vw); font-weight:700; line-height:1.02; margin:0 0 6px; color:var(--dim); }
+  main.filmpage .kicker { font-size:max(13px,0.943vw); font-weight:700; margin:1.2vw 0 1vw; color:var(--dim); }
+  main.filmpage p { font-size:max(13px,0.703vw); line-height:1.3; color:#fff; }
+  main.filmpage .credits { font-size:max(12px,0.703vw); line-height:1.3; }
+  main.filmpage .backtowork { display:inline-block; margin-top:2.6vw; font-size:max(13px,0.943vw);
+                              font-weight:700; letter-spacing:0.06em; color:#fff; text-decoration:none;
+                              border-bottom:1px solid rgba(255,255,255,0.5); padding-bottom:2px; }
+  main.filmpage .backtowork:hover { border-bottom-color:#fff; }
+  @media (max-width:900px) { main.filmpage { width:88%; } }
 
   footer { background:var(--ink); text-align:right; padding:14px 4.9vw 12px; line-height:1.5; }
   footer a { margin-left:1.6em; font-size:max(13px,0.82vw); font-weight:500;
