@@ -53,13 +53,16 @@
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
     background: rgba(20, 20, 22, 0.25);   /* keeps letters visible pre-filter */
   }
-  /* negative underlay: same mask, backdrop inverted (hue rotated back so
-     colour survives). Because it pushes the letters AWAY from whatever the
-     reel is doing behind them, the mark stays legible on both a black frame
-     and a blown-out one — the trick reused from the V3 water site. */
+  /* negative layer: white through the same mask, difference-blended, so the
+     letters are the photographic negative of whatever is behind them at
+     MARK.neg strength. Because it pushes them AWAY from the backdrop, the
+     mark reads on a black frame and a blown-out one alike — the trick reused
+     from the V3 water site. Difference blend, not backdrop-filter: stacked
+     backdrop-filters barely register (tested 2026-09-08). */
   #hero .glassneg {
     position: absolute; inset: 0;
     pointer-events: none;
+    background: #fff; mix-blend-mode: difference;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   }
@@ -70,6 +73,7 @@
     position: absolute;
     pointer-events: none;
     opacity: 0;
+    background: #fff; mix-blend-mode: difference;
     transition: opacity 0.28s ease;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
@@ -438,8 +442,7 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* neg  = opacity of the inverted underlay (legibility on any frame)
    navHi = opacity the same inversion reaches under a nav rollover */
-const MARK = window.MARK = { blur: 8, dark: 0.85, alpha: 0.8, neg: 0.35, navHi: 0.55 };
-const NEGFILTER = 'invert(1) hue-rotate(180deg)';
+const MARK = window.MARK = { blur: 8, dark: 0.85, alpha: 0.8, neg: 0.35, navHi: 0.6 };
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -453,8 +456,6 @@ const navHiEls = NAV.map(() => {
   const d = document.createElement('div');
   d.className = 'navhi';
   d.setAttribute('aria-hidden', 'true');
-  d.style.webkitBackdropFilter = NEGFILTER;
-  d.style.backdropFilter = NEGFILTER;
   hero.appendChild(d);
   return d;
 });
@@ -576,17 +577,21 @@ function paintMask() {
   glass.style.opacity = MARK.alpha;
   /* the negative sits ON TOP of the glass, so what it inverts is the already
      blurred and darkened result — that is what makes it self-correcting */
+  /* (nav rollovers stack a second negative on one word — see .navhi) */
   gneg.style.webkitMaskImage = url;
   gneg.style.maskImage = url;
-  gneg.style.webkitBackdropFilter = NEGFILTER;
-  gneg.style.backdropFilter = NEGFILTER;
   gneg.style.opacity = MARK.neg;
 }
 window.__markRepaint = paintMask;
 paintMask();
 let rT = 0;
-window.addEventListener('resize', () => { clearTimeout(rT); rT = setTimeout(paintMask, 120); });
+const repaintSoon = () => { clearTimeout(rT); rT = setTimeout(paintMask, 120); };
+window.addEventListener('resize', repaintSoon);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(paintMask);
+/* paintMask bails when the hero measures zero — which happens when the page
+   loads in a background tab. Without this the mark never appears until the
+   window is resized. */
+if (window.ResizeObserver) new ResizeObserver(repaintSoon).observe(hero);
 
 /* ---------- video fade-in over the poster ---------- */
 let faded = false;
