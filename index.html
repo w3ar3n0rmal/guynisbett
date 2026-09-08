@@ -69,17 +69,20 @@
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   }
-  /* one per nav word, masked to that word alone: rolling over frosts that
-     word — a white lift, the same move as the glass tint.
-     NOT more difference: with MARK.neg at 0.85 the letters are already close
-     to a full negative, i.e. already at maximum contrast, so adding negative
-     can only pull them back toward mid grey and the word RECEDES on hover.
-     That is what made the old highlight barely read. */
+  /* One per nav word, masked to that word alone, and it carries the word's
+     OWN negative (.glassneg covers the wordmark only). Resting at MARK.neg
+     the word matches the wordmark; on rollover it drops to MARK.navHi and
+     the word turns back to plain glass — so it flips light-to-dark on a dark
+     frame and dark-to-light on a bright one.
+     Why not the other direction: at MARK.neg 0.85 the letters are already a
+     near-full negative, i.e. already at maximum contrast against the reel, so
+     ADDING negative (or white) can only move them toward the background —
+     the word recedes on hover. Tested both ways on the live page 2026-09-08. */
   #hero .navhi {
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    background: #fff;
+    background: #fff; mix-blend-mode: difference;
     transition: opacity 0.28s ease;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
@@ -452,10 +455,11 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
    mid grey, which is what 0.35 was doing.
      blur/dark = the glass itself   tint = white lift, the ground-glass feel
      alpha     = glass opacity      neg  = strength of the negative
-     navHi     = white lift on the nav word under the pointer
+     navHi     = the negative's opacity on the nav word under the pointer
+                 (LOW — the word drops back to clear glass; see .navhi)
      navTrack  = nav letter-spacing in em (0 = normal; the wide 0.28 was for
                  the spread-out layout, not for the words sitting in the corner) */
-const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.7, navTrack: 0 };
+const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.12, navTrack: 0 };
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -481,7 +485,7 @@ const navEls = NAV.map((nv, i) => {
   a.href = nv.href;
   a.setAttribute('aria-label', nv.label);
   const on = () => { if (painted) navHiEls[i].style.opacity = MARK.navHi; };
-  const off = () => { navHiEls[i].style.opacity = 0; };
+  const off = () => { if (painted) navHiEls[i].style.opacity = MARK.neg; };
   a.addEventListener('pointerenter', on);
   a.addEventListener('pointerleave', off);
   a.addEventListener('focus', on);
@@ -524,6 +528,7 @@ function paintNavHighlights(rects, navSize, dpr) {
     st.top = (r.y - pad) + 'px';
     st.width = cw + 'px';
     st.height = ch + 'px';
+    st.opacity = MARK.neg;   /* resting state: same negative as the wordmark */
   });
 }
 
@@ -552,6 +557,10 @@ function paintMask() {
   x.fillText('GUY NISBETT', mx, y1);
   x.font = '700 ' + t2 + 'px ' + FONT;
   x.fillText('FILM DIRECTOR', mx, y2);
+
+  /* snapshot before the nav goes in: .glassneg carries the negative for the
+     WORDMARK ONLY — each nav word carries its own, so a rollover can vary it */
+  const wordmarkURL = 'url(' + c.toDataURL('image/png') + ')';
 
   /* nav, painted into the same mask so it's cut from the same glass as the
      wordmark: top-right row on the GUY NISBETT baseline; stacked and
@@ -595,8 +604,8 @@ function paintMask() {
   /* the negative sits ON TOP of the glass, so what it inverts is the already
      blurred and darkened result — that is what makes it self-correcting */
   /* (a nav rollover frosts one word white on top of this — see .navhi) */
-  gneg.style.webkitMaskImage = url;
-  gneg.style.maskImage = url;
+  gneg.style.webkitMaskImage = wordmarkURL;
+  gneg.style.maskImage = wordmarkURL;
   gneg.style.opacity = MARK.neg;
   painted = true;
 }
