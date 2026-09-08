@@ -43,50 +43,29 @@
     transform: translate(-50%, -50%);
     border: 0; pointer-events: none;
   }
-  /* the wordmark is a full-hero overlay masked to the text shape (mask
-     painted by JS with the real webfont): inside the letters the reel shows
-     through blurred and darkened — tunables in window.MARK */
-  #hero .glassmark {
-    position: absolute; inset: 0;
-    pointer-events: none;
-    opacity: 0;            /* until the mask is painted — see paintMask() */
-    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-    /* background is a white lift (MARK.tint), set by paintMask — the old dark
-       wash flattened the letters to grey and killed the translucency */
-  }
-  /* negative layer: white through the same mask, difference-blended, so the
-     letters are the photographic negative of whatever is behind them at
-     MARK.neg strength. Because it pushes them AWAY from the backdrop, the
-     mark reads on a black frame and a blown-out one alike — the trick reused
-     from the V3 water site. Difference blend, not backdrop-filter: stacked
-     backdrop-filters barely register (tested 2026-09-08). */
-  #hero .glassneg {
-    position: absolute; inset: 0;
-    pointer-events: none;
-    opacity: 0;            /* ditto — unmasked, this would invert the whole hero */
-    background: #fff; mix-blend-mode: difference;
-    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-  }
-  /* One per nav word, masked to that word alone, and it carries the word's
-     OWN negative (.glassneg covers the wordmark only). Resting at MARK.neg
-     the word matches the wordmark; on rollover it drops to MARK.navHi and
-     the word turns back to plain glass — so it flips light-to-dark on a dark
-     frame and dark-to-light on a bright one.
-     Why not the other direction: at MARK.neg 0.85 the letters are already a
-     near-full negative, i.e. already at maximum contrast against the reel, so
-     ADDING negative (or white) can only move them toward the background —
-     the word recedes on hover. Tested both ways on the live page 2026-09-08. */
-  #hero .navhi {
+  /* The mark is made of MASKED BACKDROP-FILTER LAYERS: .glassmark holds the
+     wordmark, and one .navhi holds each nav word. Each layer filters only the
+     reel inside its own glyphs — blurred (glass), luminance-inverted so the
+     letters push away from whatever is behind them, and hue-rotated 180deg to
+     put the colour back, since invert() flips hue as well as luminance and
+     without the rotation the type reads as a colour negative.
+
+     ⚠️ The layers must mask DISJOINT regions. Two backdrop-filter layers over
+     the same pixels do not compose — the second barely registers, which is
+     what made the first attempt at this look flat (2026-09-08). That is also
+     why the negative is part of this chain rather than a difference layer
+     over the top: mix-blend-mode: difference cannot be hue-corrected, so it
+     inverts the colour too. */
+  #hero .glassmark, #hero .navhi {
     position: absolute;
     pointer-events: none;
-    opacity: 0;
-    background: #fff; mix-blend-mode: difference;
-    transition: opacity 0.28s ease;
+    opacity: 0;            /* until the mask is painted — unmasked, these
+                              would filter the whole hero. See paintMask() */
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   }
+  #hero .glassmark { inset: 0; }
+  #hero .navhi { transition: opacity 0.28s ease, -webkit-backdrop-filter 0.28s ease, backdrop-filter 0.28s ease; }
   #hero .srtitle {
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
@@ -210,7 +189,6 @@
       allow="autoplay; fullscreen" title="Guy Nisbett — Showreel"></iframe>
   </div>
   <div class="glassmark" id="glassmark" aria-hidden="true"></div>
-  <div class="glassneg" id="glassneg" aria-hidden="true"></div>
   <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
   <a class="scrollcue" id="scrollcue" href="#about" aria-label="Scroll down">
     <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l8 8 8-8"/></svg>
@@ -436,30 +414,58 @@
    The wordmark is a full-hero overlay whose mask is painted onto a canvas
    with the real webfont (GUY NISBETT / FILM DIRECTOR, second line width-
    matched to the first); inside the letters, backdrop-filter shows the reel
-   blurred and darkened, with an inverted underlay over the top so the letters
-   stay legible whatever the reel is doing behind them. Tunables:
-   window.MARK = { blur, dark, alpha, neg, navHi } — call __markRepaint()
-   after changing blur/dark/alpha/neg; navHi applies on the next rollover.
+   blurred, luminance-inverted and hue-corrected, so the letters read against
+   whatever the reel is doing behind them without going colour-negative.
+   Everything is in window.MARK — change values in the console and call
+   __markRepaint().
    ========================================================================= */
 
 const hero = document.getElementById('hero');
 const videobg = document.getElementById('videobg');
 const reel = document.getElementById('reel');
 const glass = document.getElementById('glassmark');
-const gneg = document.getElementById('glassneg');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
-/* Settled on the V3 water landing's proportions (GLASS: down 14, tint 0.12,
-   alpha 0.65, diff 0.85) — a STRONG difference with a translucent glass over
-   it. Note neg must stay high: a difference layer at ~0.5 maps everything to
-   mid grey, which is what 0.35 was doing.
-     blur/dark = the glass itself   tint = white lift, the ground-glass feel
-     alpha     = glass opacity      neg  = strength of the negative
-     navHi     = the negative's opacity on the nav word under the pointer
-                 (LOW — the word drops back to clear glass; see .navhi)
-     navTrack  = nav letter-spacing in em (0 = normal; the wide 0.28 was for
-                 the spread-out layout, not for the words sitting in the corner) */
-const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.12, navTrack: 0 };
+/* ---- the numbers, all live-tunable: change and call __markRepaint() ----
+   Proportions started from the V3 water landing (down 14, tint 0.12,
+   alpha 0.65, diff 0.85).
+
+     blur    px   the glass itself — how far the reel smears inside the letters
+     invert  0..1 luminance inversion; this is what makes the type read on a
+                  black frame and a blown-out one alike. ⚠️ Keep it HIGH or at
+                  0: around 0.5 it maps everything to mid grey, which is what
+                  made the type look flat and dead.
+     hue     deg  rotated after invert to put the colour back — invert() flips
+                  hue as well as luminance, and without this the type reads as
+                  a colour negative
+     bright  1=off   contrast 1=off    saturate 1=off
+     tint    0..1 white lift painted inside the letters — the ground-glass feel
+     alpha   0..1 opacity of the whole mark: the lower it is, the more the
+                  untouched reel shows through and the glassier it reads
+
+     navInvert / navDim — the same inversion on the nav words: hovering one
+     holds it at navInvert and drops the other three to navDim. It has to work
+     that way round; see the note above .navhi in the CSS.
+     navTrack  nav letter-spacing in em. */
+const MARK = window.MARK = {
+  blur: 14, invert: 0.85, hue: 180, bright: 1, contrast: 1, saturate: 1,
+  tint: 0.12, alpha: 0.65,
+  navInvert: 0.85, navDim: 0.2, navTrack: 0
+};
+
+function markFilter(invert) {
+  return 'blur(' + MARK.blur + 'px)'
+       + ' invert(' + invert + ')'
+       + ' hue-rotate(' + MARK.hue + 'deg)'
+       + ' brightness(' + MARK.bright + ')'
+       + ' contrast(' + MARK.contrast + ')'
+       + ' saturate(' + MARK.saturate + ')';
+}
+function applyFilter(el, invert) {
+  const f = markFilter(invert);
+  el.style.webkitBackdropFilter = f;
+  el.style.backdropFilter = f;
+}
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -469,8 +475,8 @@ const NAV = [
   { label: 'BLOG',    href: 'blog/' },
   { label: 'CONTACT', href: '#contact' }
 ];
-/* nothing may be shown until paintMask() has actually run: the layers are
-   unmasked before that, and an unmasked difference layer inverts everything */
+/* nothing may be shown until paintMask() has actually run: the layers carry
+   no mask before that, and would filter the entire hero */
 let painted = false;
 const navHiEls = NAV.map(() => {
   const d = document.createElement('div');
@@ -484,8 +490,14 @@ const navEls = NAV.map((nv, i) => {
   a.className = 'hnav';
   a.href = nv.href;
   a.setAttribute('aria-label', nv.label);
-  const on = () => { if (painted) navHiEls[i].style.opacity = MARK.navHi; };
-  const off = () => { if (painted) navHiEls[i].style.opacity = MARK.neg; };
+  const on = () => {
+    if (!painted) return;
+    navHiEls.forEach((e, j) => applyFilter(e, j === i ? MARK.navInvert : MARK.navDim));
+  };
+  const off = () => {
+    if (!painted) return;
+    navHiEls.forEach(e => applyFilter(e, MARK.navInvert));
+  };
   a.addEventListener('pointerenter', on);
   a.addEventListener('pointerleave', off);
   a.addEventListener('focus', on);
@@ -528,7 +540,9 @@ function paintNavHighlights(rects, navSize, dpr) {
     st.top = (r.y - pad) + 'px';
     st.width = cw + 'px';
     st.height = ch + 'px';
-    st.opacity = MARK.neg;   /* resting state: same negative as the wordmark */
+    st.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
+    st.opacity = MARK.alpha;
+    applyFilter(navHiEls[i], MARK.navInvert);
   });
 }
 
@@ -562,9 +576,10 @@ function paintMask() {
      WORDMARK ONLY — each nav word carries its own, so a rollover can vary it */
   const wordmarkURL = 'url(' + c.toDataURL('image/png') + ')';
 
-  /* nav, painted into the same mask so it's cut from the same glass as the
-     wordmark: top-right row on the GUY NISBETT baseline; stacked and
-     right-aligned on narrow screens */
+  /* nav: top-right row on the GUY NISBETT baseline, stacked and right-aligned
+     on narrow screens. Only MEASURED here — each word is masked and filtered
+     by its own .navhi layer (see paintNavHighlights), which is what lets a
+     rollover change one word without disturbing the others */
   const navSize = Math.max(11, t1 * 0.24);
   x.font = '700 ' + navSize + 'px ' + FONT;
   if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
@@ -575,7 +590,6 @@ function paintMask() {
     for (const nv of NAV) {
       const ww = x.measureText(nv.label).width;
       x.textAlign = 'right';
-      x.fillText(nv.label, w - mx, yy);
       rects.push({ x: w - mx - ww, y: yy - navSize, w: ww, h: navSize * 1.4 });
       yy += navSize * 1.9;
     }
@@ -585,7 +599,6 @@ function paintMask() {
     const widths = NAV.map(nv => x.measureText(nv.label).width);
     let xx = w - mx - widths.reduce((a, b) => a + b, 0) - gap * (NAV.length - 1);
     NAV.forEach((nv, i) => {
-      x.fillText(nv.label, xx, y1);
       rects.push({ x: xx, y: y1 - navSize, w: widths[i], h: navSize * 1.4 });
       xx += widths[i] + gap;
     });
@@ -593,20 +606,13 @@ function paintMask() {
   if ('letterSpacing' in x) x.letterSpacing = '0px';
   positionNav(rects);
   paintNavHighlights(rects, navSize, dpr);
-  const url = 'url(' + c.toDataURL('image/png') + ')';
-  glass.style.webkitMaskImage = url;
-  glass.style.maskImage = url;
-  const f = 'blur(' + MARK.blur + 'px) brightness(' + MARK.dark + ')';
-  glass.style.webkitBackdropFilter = f;
-  glass.style.backdropFilter = f;
+  /* the wordmark layer masks the WORDMARK ONLY — the nav words are filtered
+     by their own .navhi layers, so no two backdrop-filters ever overlap */
+  glass.style.webkitMaskImage = wordmarkURL;
+  glass.style.maskImage = wordmarkURL;
+  applyFilter(glass, MARK.invert);
   glass.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
   glass.style.opacity = MARK.alpha;
-  /* the negative sits ON TOP of the glass, so what it inverts is the already
-     blurred and darkened result — that is what makes it self-correcting */
-  /* (a nav rollover frosts one word white on top of this — see .navhi) */
-  gneg.style.webkitMaskImage = wordmarkURL;
-  gneg.style.maskImage = wordmarkURL;
-  gneg.style.opacity = MARK.neg;
   painted = true;
 }
 window.__markRepaint = paintMask;
