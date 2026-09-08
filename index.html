@@ -729,10 +729,15 @@ if (window.ResizeObserver) new ResizeObserver(repaintSoon).observe(hero);
 
    The reel takes a few seconds to start — longer on a slow line — and this
    used to reveal it on a blind 4s timer, so the fade could happen before
-   Vimeo was rendering anything. Now it listens to the player itself over
-   postMessage (no player.js needed) and reveals on the first frame actually
-   played. `timeupdate` with seconds > 0 is the honest signal; `play` fires
-   before pixels exist.
+   Vimeo was rendering anything. It now listens to the player over postMessage
+   (no player.js needed) and reveals on the first frame actually played.
+
+   ⚠️ The raw postMessage API emits `playProgress`, NOT `timeupdate` —
+   `timeupdate` is the player.js SDK's name for the same thing and never
+   arrives here. Subscribing to the wrong one fails completely silently: no
+   error, no event, every load just falls through to the backstop. Measured on
+   the live page 2026-09-08: play 1233ms, playing 1237ms, playProgress 1498ms,
+   timeupdate never.
 
    ⚠️ Two guarantees, because a stuck LOADING is worse than no LOADING:
      - it only appears after LOADING_AFTER, so a fast start never flashes it
@@ -758,7 +763,7 @@ function tellPlayer(msg) {
   catch (e) { /* cross-origin not ready yet — the load handler retries */ }
 }
 function subscribe() {
-  ['play', 'playing', 'timeupdate'].forEach(
+  ['play', 'playing', 'playProgress', 'timeupdate'].forEach(
     ev => tellPlayer({ method: 'addEventListener', value: ev }));
 }
 window.addEventListener('message', (e) => {
@@ -767,8 +772,14 @@ window.addEventListener('message', (e) => {
   if (typeof d === 'string') { try { d = JSON.parse(d); } catch (_) { return; } }
   if (!d || !d.event) return;
   if (d.event === 'ready') { subscribe(); return; }
-  /* seconds > 0 means frames are on screen, which 'play' alone does not */
-  if (d.event === 'timeupdate' && d.data && d.data.seconds > 0) showVideo();
+  /* seconds > 0 means frames are on screen, which 'play' alone does not.
+     playProgress is this API's name for it; timeupdate is kept in case a
+     future player emits that instead. */
+  if ((d.event === 'playProgress' || d.event === 'timeupdate')
+      && d.data && d.data.seconds > 0) { showVideo(); return; }
+  /* belt and braces: if a player ever reports playing but never progress,
+     reveal shortly after rather than waiting out the backstop */
+  if (d.event === 'playing' || d.event === 'play') setTimeout(showVideo, 400);
 });
 reel.addEventListener('load', subscribe);   /* in case 'ready' fired early */
 subscribe();
