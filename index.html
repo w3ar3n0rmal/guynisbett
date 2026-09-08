@@ -74,23 +74,42 @@
     -webkit-tap-highlight-color: transparent;
   }
   #hero a.hnav:focus-visible { outline: none; }
+  /* The scroll cue is a filled triangle cut from the same glass as the type
+     (Guy, 2026-09-08) — its own masked backdrop-filter layer, bottom-centre,
+     so it never overlaps the wordmark's.
+     ⚠️ The pulse is split across two elements on purpose: opacity below 1 on
+     an ANCESTOR creates a backdrop root, which would leave the child's
+     backdrop-filter with nothing to sample. So the anchor animates the drift
+     and the triangle animates its own opacity. */
   #hero .scrollcue {
     position: absolute; left: 50%; bottom: max(22px, 3.4svh);
     transform: translateX(-50%);
-    width: 30px; height: 30px; padding: 12px; margin: -12px;
-    color: #fff; opacity: 0.55;
-    animation: cue-pulse 2.6s ease-in-out infinite;
-    transition: opacity 0.5s ease;
+    width: 28px; height: 16px; padding: 14px; margin: -14px;
+    animation: cue-drift 2.6s ease-in-out infinite;
     -webkit-tap-highlight-color: transparent;
   }
-  #hero .scrollcue svg { width: 100%; height: 100%; display: block; }
-  #hero .scrollcue.gone { opacity: 0; pointer-events: none; animation: none; }
+  #hero .cuetri {
+    display: block; width: 100%; height: 100%;
+    animation: cue-pulse 2.6s ease-in-out infinite;
+    transition: opacity 0.5s ease;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16'%3E%3Cpath d='M0 0H28L14 16Z' fill='%23fff'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16'%3E%3Cpath d='M0 0H28L14 16Z' fill='%23fff'/%3E%3C/svg%3E");
+  }
+  #hero .scrollcue.gone { pointer-events: none; animation: none; }
+  #hero .scrollcue.gone .cuetri { opacity: 0; animation: none; }
   @keyframes cue-pulse {
-    0%, 100% { opacity: 0.35; transform: translateX(-50%) translateY(0); }
-    50% { opacity: 0.85; transform: translateX(-50%) translateY(6px); }
+    0%, 100% { opacity: calc(var(--cue-a, 0.9) * 0.42); }
+    50%      { opacity: var(--cue-a, 0.9); }
+  }
+  @keyframes cue-drift {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(6px); }
   }
   @media (prefers-reduced-motion: reduce) {
-    #hero .scrollcue { animation: none; opacity: 0.6; }
+    #hero .scrollcue { animation: none; }
+    #hero .cuetri { animation: none; opacity: calc(var(--cue-a, 0.9) * 0.7); }
   }
 
   /* ---------- shared section chrome ----------
@@ -189,7 +208,7 @@
   <div class="glassmark" id="glassmark" aria-hidden="true"></div>
   <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
   <a class="scrollcue" id="scrollcue" href="#about" aria-label="Scroll down">
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l8 8 8-8"/></svg>
+    <span class="cuetri" id="cuetri" aria-hidden="true"></span>
   </a>
 </div>
 
@@ -422,6 +441,7 @@ const hero = document.getElementById('hero');
 const videobg = document.getElementById('videobg');
 const reel = document.getElementById('reel');
 const glass = document.getElementById('glassmark');
+const cuetri = document.getElementById('cuetri');
 const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 /* ---- the numbers, all live-tunable: change and call __markRepaint() ----
@@ -632,6 +652,11 @@ function paintMask() {
   applyFilter(glass, 1);
   glass.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
   glass.style.opacity = MARK.alpha;
+  /* the scroll cue is cut from the same glass; its mask is static CSS, so it
+     only needs the filter and the alpha the pulse animates between */
+  applyFilter(cuetri, 1);
+  cuetri.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
+  cuetri.style.setProperty('--cue-a', MARK.alpha);
   painted = true;
 }
 window.__markRepaint = paintMask;
