@@ -69,14 +69,17 @@
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
   }
-  /* one per nav word, masked to that word alone: rolling over lifts its
-     opacity, so the highlight is more of the same negative rather than an
-     underline sitting on top of it */
+  /* one per nav word, masked to that word alone: rolling over frosts that
+     word — a white lift, the same move as the glass tint.
+     NOT more difference: with MARK.neg at 0.85 the letters are already close
+     to a full negative, i.e. already at maximum contrast, so adding negative
+     can only pull them back toward mid grey and the word RECEDES on hover.
+     That is what made the old highlight barely read. */
   #hero .navhi {
     position: absolute;
     pointer-events: none;
     opacity: 0;
-    background: #fff; mix-blend-mode: difference;
+    background: #fff;
     transition: opacity 0.28s ease;
     -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
@@ -449,10 +452,10 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
    mid grey, which is what 0.35 was doing.
      blur/dark = the glass itself   tint = white lift, the ground-glass feel
      alpha     = glass opacity      neg  = strength of the negative
-     navHi     = extra negative under a nav rollover
+     navHi     = white lift on the nav word under the pointer
      navTrack  = nav letter-spacing in em (0 = normal; the wide 0.28 was for
                  the spread-out layout, not for the words sitting in the corner) */
-const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.6, navTrack: 0 };
+const MARK = window.MARK = { blur: 14, dark: 1, tint: 0.12, alpha: 0.65, neg: 0.85, navHi: 0.7, navTrack: 0 };
 
 /* nav lives in the same painted mask; these invisible anchors sit over the
    painted words (recomputed by every paintMask) */
@@ -591,7 +594,7 @@ function paintMask() {
   glass.style.opacity = MARK.alpha;
   /* the negative sits ON TOP of the glass, so what it inverts is the already
      blurred and darkened result — that is what makes it self-correcting */
-  /* (nav rollovers stack a second negative on one word — see .navhi) */
+  /* (a nav rollover frosts one word white on top of this — see .navhi) */
   gneg.style.webkitMaskImage = url;
   gneg.style.maskImage = url;
   gneg.style.opacity = MARK.neg;
