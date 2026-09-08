@@ -57,6 +57,18 @@
     position: absolute; width: 1px; height: 1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
   }
+  /* invisible hit targets over the mask-painted nav words */
+  #hero a.hnav {
+    position: absolute; display: block;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #hero a.hnav::after {
+    content: ""; position: absolute; left: 22%; right: 22%; bottom: 6px;
+    height: 2px; background: #fff; opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  #hero a.hnav:hover::after, #hero a.hnav:focus-visible::after { opacity: 0.85; }
+  #hero a.hnav:focus-visible { outline: none; }
   #hero .scrollcue {
     position: absolute; left: 50%; bottom: max(22px, 3.4svh);
     transform: translateX(-50%);
@@ -407,6 +419,33 @@ const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
 
 const MARK = window.MARK = { blur: 8, dark: 0.85, alpha: 0.8 };
 
+/* nav lives in the same painted mask; these invisible anchors sit over the
+   painted words (recomputed by every paintMask) */
+const NAV = [
+  { label: 'ABOUT',   href: '#about' },
+  { label: 'WORK',    href: '#work' },
+  { label: 'BLOG',    href: 'blog/' },
+  { label: 'CONTACT', href: '#contact' }
+];
+const navEls = NAV.map(nv => {
+  const a = document.createElement('a');
+  a.className = 'hnav';
+  a.href = nv.href;
+  a.setAttribute('aria-label', nv.label);
+  hero.appendChild(a);
+  return a;
+});
+function positionNav(rects) {
+  rects.forEach((r, i) => {
+    const s = navEls[i].style;
+    const padX = Math.max(8, (44 - r.w) / 2), padY = Math.max(8, (44 - r.h) / 2);
+    s.left = (r.x - padX) + 'px';
+    s.top = (r.y - padY) + 'px';
+    s.width = (r.w + padX * 2) + 'px';
+    s.height = (r.h + padY * 2) + 'px';
+  });
+}
+
 function paintMask() {
   const w = hero.clientWidth, h = hero.clientHeight;
   if (!w || !h) return;
@@ -432,6 +471,37 @@ function paintMask() {
   x.fillText('GUY NISBETT', mx, y1);
   x.font = '700 ' + t2 + 'px ' + FONT;
   x.fillText('FILM DIRECTOR', mx, y2);
+
+  /* nav, painted into the same mask so it's cut from the same glass as the
+     wordmark: top-right row on the GUY NISBETT baseline; stacked and
+     right-aligned on narrow screens */
+  const navSize = Math.max(11, t1 * 0.24);
+  x.font = '700 ' + navSize + 'px ' + FONT;
+  if ('letterSpacing' in x) x.letterSpacing = '0.28em';
+  const rects = [];
+  const stacked = w <= 640;
+  if (stacked) {
+    let yy = y1;
+    for (const nv of NAV) {
+      const ww = x.measureText(nv.label).width;
+      x.textAlign = 'right';
+      x.fillText(nv.label, w - mx, yy);
+      rects.push({ x: w - mx - ww, y: yy - navSize, w: ww, h: navSize * 1.4 });
+      yy += navSize * 1.9;
+    }
+    x.textAlign = 'left';
+  } else {
+    const gap = navSize * 1.8;
+    const widths = NAV.map(nv => x.measureText(nv.label).width);
+    let xx = w - mx - widths.reduce((a, b) => a + b, 0) - gap * (NAV.length - 1);
+    NAV.forEach((nv, i) => {
+      x.fillText(nv.label, xx, y1);
+      rects.push({ x: xx, y: y1 - navSize, w: widths[i], h: navSize * 1.4 });
+      xx += widths[i] + gap;
+    });
+  }
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  positionNav(rects);
   const url = 'url(' + c.toDataURL('image/png') + ')';
   glass.style.webkitMaskImage = url;
   glass.style.maskImage = url;
