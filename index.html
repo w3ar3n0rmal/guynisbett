@@ -48,16 +48,19 @@
   #hero .videobg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease; }
   #hero .videobg.on { opacity: 1; }
   /* Shown on the poster until the reel actually starts rendering frames.
-     Bottom-left on the wordmark's own margin, clear of the centre scroll cue. */
+     Dead centre of the hero — it was bottom-left and Guy missed it entirely.
+     The pulse animates opacity only, never transform, because the transform
+     here is doing the centring. */
   #hero .loading {
-    position: absolute; left: max(20px, 3vw); bottom: max(10px, 2.4svh);
-    margin: 0; font-size: max(11px, 0.82vw); font-weight: 700;
-    letter-spacing: 0.18em; color: #fff;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0; font-size: max(12px, 0.94vw); font-weight: 700;
+    letter-spacing: 0.28em; text-indent: 0.28em; color: #fff;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
     opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
   }
   #hero .loading.show { animation: loading-pulse 1.5s ease-in-out infinite; }
-  @keyframes loading-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
+  @keyframes loading-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
     #hero .loading.show { animation: none; opacity: 0.7; }
   }
