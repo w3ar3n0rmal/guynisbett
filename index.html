@@ -193,8 +193,13 @@
   .js .film .text > :nth-child(2) { transition-delay: calc(var(--stagger, 165ms) * 1); }
   .js .film .text > :nth-child(3) { transition-delay: calc(var(--stagger, 165ms) * 2); }
   .js .film .text > :nth-child(4) { transition-delay: calc(var(--stagger, 165ms) * 3); }
+  /* About uses the same fade, but each line (and the logo grid) is watched on
+     its own: the block is taller than a phone screen, so waiting for a share of
+     the whole block could leave it hidden. Stagger is set in JS per batch. */
+  .js #about .inner > * { opacity: 0; transition: opacity var(--fade, 1040ms) ease; }
+  .js #about .inner > .shown { opacity: 1; }
   @media (prefers-reduced-motion: reduce) {
-    .js .film .text > * { opacity: 1; transition: none; transition-delay: 0s; }
+    .js .film .text > *, .js #about .inner > * { opacity: 1; transition: none; transition-delay: 0s; }
   }
   .film .text h2 { margin-top: 1vw; }
   /* the heading links to the film's own page — styled to be visually identical
@@ -807,6 +812,7 @@ const REVEAL = window.REVEAL = { fadeFrames: 25, staggerFrames: 4, fps: 24 };
   /* no IntersectionObserver (or reduced motion) — show everything, don't gamble */
   if (!window.IntersectionObserver) {
     blocks.forEach(b => b.classList.add('shown'));
+    document.querySelectorAll('#about .inner > *').forEach(l => l.classList.add('shown'));
     return;
   }
   const io = new IntersectionObserver((entries) => {
@@ -817,6 +823,18 @@ const REVEAL = window.REVEAL = { fadeFrames: 25, staggerFrames: 4, fps: 24 };
     });
   }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
   blocks.forEach(b => io.observe(b));
+
+  /* About: one observer per line. Lines that arrive together stagger in order;
+     a line arriving alone (the logos, further down) fades straight away. */
+  const lines = document.querySelectorAll('#about .inner > *');
+  const aio = new IntersectionObserver((entries) => {
+    entries.filter(e => e.isIntersecting).forEach((e, i) => {
+      e.target.style.transitionDelay = (i * ms(REVEAL.staggerFrames)) + 'ms';
+      e.target.classList.add('shown');
+      aio.unobserve(e.target);
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+  lines.forEach(l => aio.observe(l));
 })();
 
 const cue = document.getElementById('scrollcue');
