@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>document.documentElement.className += " js";</script>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PREVIEW — GUY NISBETT — Creative / AI / CGI / Film Director</title>
+<meta name="description" content="Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.">
+<meta property="og:title" content="GUY NISBETT">
+<meta property="og:description" content="Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.">
+<meta property="og:url" content="https://guynisbett.com">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Guy Nisbett">
+<meta property="og:image" content="https://guynisbett.com/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guy Nisbett — film director showreel">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://guynisbett.com/">
+<link rel="icon" type="image/png" href="assets/img/browser-icon.png">
+<link rel="stylesheet" href="https://use.typekit.net/dyw6xci.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Person", "name": "Guy Nisbett", "jobTitle": "Film Director", "url": "https://guynisbett.com/", "image": "https://guynisbett.com/assets/img/og-image.jpg", "description": "Award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.", "knowsAbout": ["Film direction", "CGI direction", "Generative AI", "Cinematography", "Editing", "Post production"], "sameAs": ["https://vimeo.com/guynisbett", "https://www.instagram.com/guynisbett/", "https://wearenormal.ai"]}</script>
+<style>
+  :root {
+    --grey-bright: #a8a6a1;   /* about ground        */
+    --grey-mid:    #7e7d7c;   /* work ground         */
+    --ink:         #38383b;   /* footer / dark ground */
+    --paper:       #ffffff;
+    --dim:         #dfe0e1;
+    --font: "aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  html, body { margin: 0; padding: 0; background: var(--grey-mid); }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); color: var(--dim); -webkit-font-smoothing: antialiased; }
+
+  /* ---------- hero: showreel streaming from Vimeo ----------
+     poster = the reel's exact first frame, painted instantly as the hero
+     background; the background-mode embed fades in over it once loaded.
+     Wordmark + nav sit on top in difference blend so they read on any shot. */
+  #hero {
+    position: relative;
+    height: 100svh;
+    min-height: 480px;
+    -webkit-user-select: none; user-select: none;
+    overflow: hidden;
+    background: var(--grey-bright) url('assets/img/reel-poster.jpg') center/cover no-repeat;
+  }
+  #hero .videobg { position: absolute; inset: 0; opacity: 0; transition: opacity 0.9s ease; }
+  #hero .videobg.on { opacity: 1; }
+  /* Shown on the poster until the reel actually starts rendering frames.
+     Dead centre of the hero — it was bottom-left and Guy missed it entirely.
+     The pulse animates opacity only, never transform, because the transform
+     here is doing the centring. */
+  #hero .loading {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0; font-size: max(12px, 0.94vw); font-weight: 700;
+    letter-spacing: 0.28em; text-indent: 0.28em; color: #fff;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+    opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+  }
+  #hero .loading.show { animation: loading-pulse 1.5s ease-in-out infinite; }
+  @keyframes loading-pulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    #hero .loading.show { animation: none; opacity: 0.7; }
+  }
+  #hero .videobg iframe {
+    position: absolute; top: 50%; left: 50%;
+    width: max(100vw, 177.78svh); height: max(100svh, 56.25vw);
+    transform: translate(-50%, -50%);
+    border: 0; pointer-events: none;
+  }
+  /* The mark is made of MASKED BACKDROP-FILTER LAYERS: .glassmark holds the
+     wordmark, and one .navhi holds each nav word. Each filters only the reel
+     inside its own glyphs — blurred, lifted and slightly desaturated, with a
+     touch of inversion. The values come from Guy's Fusion comp; see MARK.
+
+     ⚠️ The layers must mask DISJOINT regions. Two backdrop-filter layers over
+     the same pixels do not compose — the second barely registers, which is
+     what made an earlier attempt look flat (2026-09-08). That is also why the
+     inversion is part of this chain rather than a mix-blend-mode: difference
+     layer over the top: a blend result has no filter hook in CSS, so it can
+     never be hue-corrected and always inverts the colour too. */
+  #hero .glassmark, #hero .navhi {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;            /* until the mask is painted — unmasked, these
+                              would filter the whole hero. See paintMask() */
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+  }
+  #hero .glassmark { inset: 0; }
+  #hero .navhi { transition: opacity 0.28s ease, -webkit-backdrop-filter 0.28s ease, backdrop-filter 0.28s ease; }
+  #hero .srtitle {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; margin: 0;
+  }
+  /* invisible hit targets over the mask-painted nav words */
+  #hero a.hnav {
+    position: absolute; display: block;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #hero a.hnav:focus-visible { outline: none; }
+  /* The scroll cue is a filled triangle cut from the same glass as the type
+     (Guy, 2026-09-08) — its own masked backdrop-filter layer, bottom-centre,
+     so it never overlaps the wordmark's.
+     ⚠️ The pulse is split across two elements on purpose: opacity below 1 on
+     an ANCESTOR creates a backdrop root, which would leave the child's
+     backdrop-filter with nothing to sample. So the anchor animates the drift
+     and the triangle animates its own opacity. */
+  #hero .scrollcue {
+    position: absolute; left: 50%; bottom: max(10px, 2.4svh);
+    transform: translateX(-50%);
+    /* padding is the hit target. NO negative margin to cancel it: the element
+       is absolutely positioned so the padding pushes nothing around, while
+       translateX(-50%) centres the PADDED box — a -14px margin on top of that
+       just shifts the triangle off centre, which is what the old chevron did. */
+    width: 28px; height: 16px; padding: 14px;
+    animation: cue-drift 2.6s ease-in-out infinite;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #hero .cuetri {
+    display: block; width: 100%; height: 100%;
+    animation: cue-pulse 2.6s ease-in-out infinite;
+    transition: opacity 0.5s ease;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16'%3E%3Cpath d='M0 0H28L14 16Z' fill='%23fff'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 16'%3E%3Cpath d='M0 0H28L14 16Z' fill='%23fff'/%3E%3C/svg%3E");
+  }
+  #hero .scrollcue.gone { pointer-events: none; animation: none; }
+  #hero .scrollcue.gone .cuetri { opacity: 0; animation: none; }
+  @keyframes cue-pulse {
+    0%, 100% { opacity: calc(var(--cue-a, 0.9) * 0.42); }
+    50%      { opacity: var(--cue-a, 0.9); }
+  }
+  @keyframes cue-drift {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(6px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #hero .scrollcue { animation: none; }
+    #hero .cuetri { animation: none; opacity: calc(var(--cue-a, 0.9) * 0.7); }
+  }
+
+  /* ---------- shared section chrome ----------
+     everything below is transcribed from the live Squarespace original,
+     measured at a 1702px viewport and expressed in vw so it scales
+     continuously like Squarespace does:
+       h2 50.76px = 2.983vw · lh 1.02 · #DFE0E1
+       kicker h4 16.04px = 0.943vw · 700
+       body/credits 11.96px = 0.703vw · lh 1.3
+       about column 783px = 46vw · centred
+       work: video 3vw|54.8vw, gap 8.9vw, text 29.3vw|4vw, row gap 9.6vw
+       contact: 65.2vw tall, heading 9.2vw from top, icons near bottom
+       footer: thin right-aligned strip, 12px underlined #A8A6A1 links */
+  h2 { font-size: max(28px, 2.983vw); font-weight: 700; line-height: 1.02; margin: 0 0 6px; color: var(--dim); }
+  .kicker { font-size: max(13px, 0.943vw); font-weight: 700; margin: 1.65vw 0 1.2vw; color: var(--dim); }
+  p { font-size: max(12px, 0.703vw); line-height: 1.3; margin: 0 0 1em; color: var(--dim); }
+  .credits { font-size: max(12px, 0.703vw); line-height: 1.3; }
+  a { color: inherit; }
+  a:hover { color: var(--paper); }
+
+  /* ---------- about: one centred 46vw column ---------- */
+  #about { background: var(--grey-bright); color: #fff; text-align: center; padding: 4.3vw 0 4.35vw; }
+  #about .inner { width: min(46vw, 92%); max-width: none; margin: 0 auto; }
+  #about .skills { font-size: max(13px, 0.943vw); font-weight: 700; line-height: 1.1; margin: 0 0 1.65vw; color: #fff; }
+  #about .statement { font-size: max(12px, 0.703vw); font-weight: 700; line-height: 1.1; margin: 0 0 1.65vw; color: #fff; }
+  #about .bio { font-size: max(12px, 0.703vw); line-height: 1.3; margin: 0 0 2vw; color: #fff; }
+  #about img.clients { width: 100%; display: block; margin: 0 auto; }
+
+  /* ---------- work: video left / text right ---------- */
+  #work { background: var(--grey-mid); padding: 1.5vw 4vw 1.5vw 3vw; }
+  #work .inner { max-width: none; }
+  .film { display: flex; align-items: flex-start; gap: 8.9vw; padding: 4.79vw 0; }
+  .film .embed {
+    position: relative; flex: 0 0 54.8vw; aspect-ratio: 16 / 9;
+    background: #000;
+  }
+  .film .embed iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .film .text { flex: 1; min-width: 0; }
+  /* Film details fade up line by line as the block comes into view — the old
+     Squarespace behaviour Guy asked for back: a 25-frame fade (~1040ms at 24fps),
+     each line four frames behind the last.
+     ⚠️ Scoped to .js and applied only before the reveal: if the script never
+     runs, nothing is ever hidden. Never hide content you cannot guarantee
+     un-hiding. */
+  .js .film .text > * {
+    opacity: 0;
+    transition: opacity var(--fade, 1040ms) ease;
+  }
+  .js .film .text.shown > * { opacity: 1; }
+  .js .film .text > :nth-child(2) { transition-delay: calc(var(--stagger, 165ms) * 1); }
+  .js .film .text > :nth-child(3) { transition-delay: calc(var(--stagger, 165ms) * 2); }
+  .js .film .text > :nth-child(4) { transition-delay: calc(var(--stagger, 165ms) * 3); }
+  /* About uses the same fade, but each line (and the logo grid) is watched on
+     its own: the block is taller than a phone screen, so waiting for a share of
+     the whole block could leave it hidden. Stagger is set in JS per batch. */
+  .js #about .inner > * { opacity: 0; transition: opacity var(--fade, 1040ms) ease; }
+  .js #about .inner > .shown { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .js .film .text > *, .js #about .inner > * { opacity: 1; transition: none; transition-delay: 0s; }
+  }
+  .film .text h2 { margin-top: 1vw; }
+  /* the heading links to the film's own page — styled to be visually identical
+     to the plain heading it replaced; this is what stops those pages being
+     orphans that only the sitemap knows about.
+     ⚠️ Never an underline on hover, anywhere — Guy's standing rule. The hover
+     cue is a dip in opacity, matching the contact links and social icons
+     (a lift to white is invisible — the heading is already #dfe0e1). */
+  .film .text h2 a.filmlink { color: inherit; text-decoration: none; transition: opacity 0.25s ease; }
+  .film .text h2 a.filmlink:hover { opacity: 0.75; }
+  @media (max-width: 900px) {
+    .film { display: block; }
+    .film .embed { margin-bottom: 22px; }
+    .film .text h2 { margin-top: 0; }
+    #about .inner { width: 88%; }
+    #work { padding: 4vw 6vw; }
+    .film { padding: 7vw 0; }
+  }
+
+  /* ---------- contact: photo ground, height fits the content ---------- */
+  #contact {
+    position: relative; color: #fff; text-align: center;
+    background: var(--ink) url('assets/img/Image.jpg') center/cover no-repeat;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 7vw 6vw 6vw;
+  }
+  #contact::before { content: ""; position: absolute; inset: 0; background: rgba(56,56,59,0.43); }
+  #contact .inner { position: relative; }
+  #contact h2 { color: #fff; margin: 0 0 1.8vw; }
+  #contact .mail {
+    display: inline-block; font-weight: 500; font-size: max(16px, 1.06vw);
+    letter-spacing: 0.02em; color: #fff; text-decoration: none;
+  }
+  #contact .mail:hover { opacity: 0.75; }
+  #contact .ai-note {
+    margin: 2.2vw 0 0; font-size: max(13px, 0.82vw); line-height: 1.55;
+    color: #dcdcdc;
+  }
+  #contact .ai-note a { color: #fff; text-decoration: none; font-weight: 500; }
+  #contact .ai-note a:hover { opacity: 0.75; }
+  #contact .social { position: relative; display: flex; gap: 12px; justify-content: center; margin-top: 3.4vw; }
+  #contact .social a { display: block; width: 20px; height: 20px; color: #fff; }
+  #contact .social a:hover { opacity: 0.75; }
+  #contact .social svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+
+  /* ---------- footer: right-aligned, styled like the contact links ---------- */
+  footer { background: var(--ink); text-align: right; padding: 14px 4.9vw 12px; line-height: 1.5; }
+  footer a {
+    margin-left: 1.6em; font-size: max(13px, 0.82vw); font-weight: 500;
+    color: #dcdcdc; text-decoration: none;
+  }
+  footer a:hover { color: #fff; }
+  @media (max-width: 640px) {
+    footer { text-align: center; }
+    footer a { margin: 0 7px; display: inline-block; }
+  }
+</style>
+<link rel="stylesheet" href="preview/preview.css">
+</head>
+<body>
+
+<div id="hero">
+  <div class="videobg" id="videobg">
+    <iframe id="reel" src="https://player.vimeo.com/video/1224682030?background=1&autoplay=1&loop=1&muted=1&autopause=0&app_id=58479"
+      allow="autoplay; fullscreen" title="Guy Nisbett — Showreel"></iframe>
+  </div>
+  <p class="loading" id="loading" role="status" aria-live="polite">LOADING</p>
+  <div class="glassmark" id="glassmark" aria-hidden="true"></div>
+  <h1 class="srtitle">GUY NISBETT — FILM DIRECTOR</h1>
+  <a class="scrollcue" id="scrollcue" href="#about" aria-label="Scroll down">
+    <span class="cuetri" id="cuetri" aria-hidden="true"></span>
+  </a>
+</div>
+
+<main>
+  <section id="about">
+    <div class="inner">
+      <p class="skills">Live action direction. CGI direction. Creative direction. Cinematography. Editing. Post production.</p>
+      <p class="statement">Guy Nisbett is an award winning, multi-skilled freelance director of ads, branded content and corporates, for global brands.</p>
+      <p class="bio">Trained at BBC Television, he directed a string of top ten music videos before moving into advertising, combining live action, motion graphics and CGI with award winning results. Alongside work with larger crews and post-production facilities, he began shooting and editing many of his films, pushing the boundaries of multi-skilled production. Most recently he embraced AI production, founding NORMAL to handle generative AI focused work. His films span automotive, luxury, travel, architecture, technology, lifestyle, documentary and more, using location and studio shooting, green screen, drones, voice over, interviews, motion graphics, CGI, 360, VR and generative AI. A multi-skilled approach allows him to work flexibly with both large and small teams. All the way from developing creative treatments and scripting, to directing live action and CGI, and delivering remotely from his own suite. He is based in the City of London, UK.</p>
+      <div class="logostrip" role="img" aria-label="Selected clients"><div class="track"><img src="assets/img/logos/logo-00.png" alt='Halifax' style="--w:0.663" loading="lazy"><img src="assets/img/logos/logo-01.png" alt='Alcatel-Lucent' style="--w:0.99" loading="lazy"><img src="assets/img/logos/logo-02.png" alt='Google' style="--w:1.582" loading="lazy"><img src="assets/img/logos/logo-03.png" alt='Travelport' style="--w:1.21" loading="lazy"><img src="assets/img/logos/logo-04.png" alt='Land Rover' style="--w:0.563" loading="lazy"><img src="assets/img/logos/logo-05.png" alt='NIVEA' style="--w:0.808" loading="lazy"><img src="assets/img/logos/logo-06.png" alt='MTV' style="--w:0.55" loading="lazy"><img src="assets/img/logos/logo-07.png" alt='Sony' style="--w:1.087" loading="lazy"><img src="assets/img/logos/logo-08.png" alt='Visa' style="--w:0.668" loading="lazy"><img src="assets/img/logos/logo-09.png" alt='Honda' style="--w:1.378" loading="lazy"><img src="assets/img/logos/logo-10.png" alt='Santander' style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-11.png" alt='De Beers' style="--w:1.256" loading="lazy"><img src="assets/img/logos/logo-12.png" alt='EE' style="--w:0.55" loading="lazy"><img src="assets/img/logos/logo-13.png" alt='Balfour Beatty' style="--w:1.0" loading="lazy"><img src="assets/img/logos/logo-14.png" alt='Molton Brown' style="--w:1.59" loading="lazy"><img src="assets/img/logos/logo-15.png" alt='AVL' style="--w:1.144" loading="lazy"><img src="assets/img/logos/logo-16.png" alt='Gtech' style="--w:0.835" loading="lazy"><img src="assets/img/logos/logo-17.png" alt='BBC' style="--w:0.609" loading="lazy"><img src="assets/img/logos/logo-18.png" alt='Allford Hall Monaghan Morris' style="--w:0.671" loading="lazy"><img src="assets/img/logos/logo-19.png" alt='ASDA' style="--w:0.672" loading="lazy"><img src="assets/img/logos/logo-20.png" alt='Hotpoint' style="--w:1.052" loading="lazy"><img src="assets/img/logos/logo-21.png" alt='Samsung' style="--w:1.11" loading="lazy"><img src="assets/img/logos/logo-22.png" alt='Populous' style="--w:1.2" loading="lazy"><img src="assets/img/logos/logo-23.png" alt='Piercy&Company' style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-24.png" alt='British Airways' style="--w:0.947" loading="lazy"><img src="assets/img/logos/logo-25.png" alt='Nestlé' style="--w:0.737" loading="lazy"><img src="assets/img/logos/logo-26.png" alt='Currys' style="--w:0.911" loading="lazy"><img src="assets/img/logos/logo-27.png" alt='Channel 4' style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-28.png" alt='ExxonMobil' style="--w:1.079" loading="lazy"><img src="assets/img/logos/logo-29.png" alt="Levi's" style="--w:0.551" loading="lazy"><img src="assets/img/logos/logo-00.png" alt="" aria-hidden="true" style="--w:0.663" loading="lazy"><img src="assets/img/logos/logo-01.png" alt="" aria-hidden="true" style="--w:0.99" loading="lazy"><img src="assets/img/logos/logo-02.png" alt="" aria-hidden="true" style="--w:1.582" loading="lazy"><img src="assets/img/logos/logo-03.png" alt="" aria-hidden="true" style="--w:1.21" loading="lazy"><img src="assets/img/logos/logo-04.png" alt="" aria-hidden="true" style="--w:0.563" loading="lazy"><img src="assets/img/logos/logo-05.png" alt="" aria-hidden="true" style="--w:0.808" loading="lazy"><img src="assets/img/logos/logo-06.png" alt="" aria-hidden="true" style="--w:0.55" loading="lazy"><img src="assets/img/logos/logo-07.png" alt="" aria-hidden="true" style="--w:1.087" loading="lazy"><img src="assets/img/logos/logo-08.png" alt="" aria-hidden="true" style="--w:0.668" loading="lazy"><img src="assets/img/logos/logo-09.png" alt="" aria-hidden="true" style="--w:1.378" loading="lazy"><img src="assets/img/logos/logo-10.png" alt="" aria-hidden="true" style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-11.png" alt="" aria-hidden="true" style="--w:1.256" loading="lazy"><img src="assets/img/logos/logo-12.png" alt="" aria-hidden="true" style="--w:0.55" loading="lazy"><img src="assets/img/logos/logo-13.png" alt="" aria-hidden="true" style="--w:1.0" loading="lazy"><img src="assets/img/logos/logo-14.png" alt="" aria-hidden="true" style="--w:1.59" loading="lazy"><img src="assets/img/logos/logo-15.png" alt="" aria-hidden="true" style="--w:1.144" loading="lazy"><img src="assets/img/logos/logo-16.png" alt="" aria-hidden="true" style="--w:0.835" loading="lazy"><img src="assets/img/logos/logo-17.png" alt="" aria-hidden="true" style="--w:0.609" loading="lazy"><img src="assets/img/logos/logo-18.png" alt="" aria-hidden="true" style="--w:0.671" loading="lazy"><img src="assets/img/logos/logo-19.png" alt="" aria-hidden="true" style="--w:0.672" loading="lazy"><img src="assets/img/logos/logo-20.png" alt="" aria-hidden="true" style="--w:1.052" loading="lazy"><img src="assets/img/logos/logo-21.png" alt="" aria-hidden="true" style="--w:1.11" loading="lazy"><img src="assets/img/logos/logo-22.png" alt="" aria-hidden="true" style="--w:1.2" loading="lazy"><img src="assets/img/logos/logo-23.png" alt="" aria-hidden="true" style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-24.png" alt="" aria-hidden="true" style="--w:0.947" loading="lazy"><img src="assets/img/logos/logo-25.png" alt="" aria-hidden="true" style="--w:0.737" loading="lazy"><img src="assets/img/logos/logo-26.png" alt="" aria-hidden="true" style="--w:0.911" loading="lazy"><img src="assets/img/logos/logo-27.png" alt="" aria-hidden="true" style="--w:1.7" loading="lazy"><img src="assets/img/logos/logo-28.png" alt="" aria-hidden="true" style="--w:1.079" loading="lazy"><img src="assets/img/logos/logo-29.png" alt="" aria-hidden="true" style="--w:0.551" loading="lazy"></div></div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="inner">
+      <!-- film sections generated by build.py from films.json -->
+      
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/1207014566" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="AI — Introducing NORMAL"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/introducing-normal.html">AI</a></h2>
+          <p class="kicker">Introducing NORMAL</p>
+          <p>Guy Nisbett is the founder and creative director of NORMAL, a creative studio combining AI with award winning, human film making. Find out more at <a href="https://wearenormal.ai" target="_blank" rel="noopener"><strong>wearenormal.ai</strong></a></p>
+          
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/1051940365?h=de4b7627a2" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Experiential — CPPS Earthquake Education Centre, Switzerland"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/cpps-earthquake-education-centre-switzerland.html">Experiential</a></h2>
+          <p class="kicker">CPPS Earthquake Education Centre, Switzerland</p>
+          <p>Combining immersive projections with a sophisticated hydraulic platform driven by seismic data, the CPPS Earthquake Simulator can replicate any earthquake. Together with the INK creative and CGI team, we developed a series of 30 minute films, transporting visitors to the epicentre of history’s most destructive earthquakes, while explaining the science, and training them to survive.</p>
+          <p class="credits">Creative &amp; Script: Guy Nisbett<br>Co-Director with the INK creative team: Guy Nisbett<br>Production Company: INK<br>Client: CPPS</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/645115765?h=d7ca7932bf" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Charity — Virgin O2 + Carers UK"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/virgin-o2-and-carers-uk.html">Charity</a></h2>
+          <p class="kicker">Virgin O2 + Carers UK</p>
+          <p><em>WINNER OF TWO EVCOM FILM AWARDS, 2022 &nbsp;NOMINATED FOR TWO EVCOM CLARION AWARDS, 2022</em><br><br>To launch the partnership of Virgin O2 and Carers UK, a dramatised story based on interviews with three carers, with an uplifting twist.</p>
+          <p class="credits">Director &amp; Creative: Guy Nisbett<br>Production Company: Taylor Made Media<br>Client: Virgin O2<br>Producer: Sophie Taylor<br>Head of Production: Ian McGinty<br>DoP: Steve Moss<br>Sound recordist: Sam Diamond<br>Editing and Post: Guy Nisbett</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/885222917" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Technology — Levidian - LOOP"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/levidian-loop.html">Technology</a></h2>
+          <p class="kicker">Levidian - LOOP</p>
+          <p>Levidian’s clever technology turns the greenhouse gas methane into hydrogen and graphene. Clean energy, and a building block for advanced materials. See how it works in this CGI film, directed for INK.</p>
+          <p class="credits">Director &amp; Creative: Guy Nisbett<br>Production Company: INK<br>CGI Production: INK<br>Client: LEVIDIAN</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/487519591?h=175a3fe601&background=1&autoplay=1&loop=1" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Fashion — Resort 2021"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/eudon-choi-resort-2021.html">Fashion</a></h2>
+          <p class="kicker">Resort 2021</p>
+          <p>A social, online and in-store campaign for the EUDON CHOI Resort 2021 collection, exploring the boundaries of film and photography with a series of seamless, slow motion loops.</p>
+          <p class="credits">Client: EUDON CHOI</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/44989074?h=23b6c3f943" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Formula 1 — The London Grand Prix by Santander"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/the-london-grand-prix-by-santander.html">Formula 1</a></h2>
+          <p class="kicker">The London Grand Prix by Santander</p>
+          <p>World Champions Lewis Hamilton and Jenson Button imagine a London F1 street race, in an award winning live action and CGI film, directed, scripted and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Motion Graphics: Territory Studio<br>Client: Santander</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/190100634?h=fd86b75870" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Technology — The Gtech Mountain eBike"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/the-gtech-mountain-ebike.html">Technology</a></h2>
+          <p class="kicker">The Gtech Mountain eBike</p>
+          <p>Live action, motion graphics and drones in Snowdonia, with voice over provided by Gtech’s founder, Nick Grey. Directed and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: INK<br>Client: Gtech</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/264415641?h=3dcd8f7b03" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Lifestyle — HP Envy X2"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/hp-envy-x2.html">Lifestyle</a></h2>
+          <p class="kicker">HP Envy X2</p>
+          <p>Everything you can do with with the Envy x2, including shoot yourself dancing. Directed and cut by Guy Nisbett.</p>
+          <p class="credits">Agency: AMVBBDO<br>Client: HP</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/143030106?h=bb9e161ad3" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Luxury — Molton Brown - Tobacco Absolute"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/molton-brown-tobacco-absolute.html">Luxury</a></h2>
+          <p class="kicker">Molton Brown - Tobacco Absolute</p>
+          <p>Botanist Dr. Mark Spencer explains the allure of the tobacco plant, from a series of films exploring the ingredients of their perfumes. Directed, shot, and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: Connected Pictures<br>Client: Molton Brown</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/44921649?h=7dbb0a14ea" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Design — BA - Behind the Design"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/ba-behind-the-design.html">Design</a></h2>
+          <p class="kicker">BA - Behind the Design</p>
+          <p>For the launch of the redesigned British Airways cabin, we go ‘behind the design’, to show the passion and attention to detail of the designers, as well as their influences in luxury products. Directed, shot, and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company: Connected Pictures<br>Client: British Airways</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/256814879?h=7d13242b62" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Architecture — The Copyright Building"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/the-copyright-building.html">Architecture</a></h2>
+          <p class="kicker">The Copyright Building</p>
+          <p>An interview lead film without talking heads, based on audio recordings of the architects in conversation with the director. Following its successful launch, The Copyright Building is set to become the UK headquarters of Netflix. Directed, shot, cut and graded by Guy Nisbett.</p>
+          <p class="credits">Production Company: INK<br>Client: Piercy&amp;Co</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/500156240?h=d41233eecd" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Automotive — Land Rover Future Technologies"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/land-rover-future-technologies.html">Automotive</a></h2>
+          <p class="kicker">Land Rover Future Technologies</p>
+          <p>Scripted and directed by Guy Nisbett, the Discovery Vision Concept is brought to life using CGI, voice over, and artful sound design.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: Land Rover</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/250636997?h=77fc267181" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="VR / 360 — ENEC Nuclear Reactor Tour"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/enec-nuclear-reactor-tour.html">VR / 360</a></h2>
+          <p class="kicker">ENEC Nuclear Reactor Tour</p>
+          <p>Designed to be viewed in 3D using the Samsung Gear, this 360 film gives a guided tour of the Barakah reactor, explaining how electricity is generated. Scripted and directed by Guy Nisbett, the film offers an audience of students and school children a compelling and comfortable experience of VR.<br><br><strong>On mobile devices, for the best experience watch the film in the YouTube app, <a href="https://youtu.be/WdKh2R00TOo" target="_blank" rel="noopener">here</a>.</strong></p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: ENEC</p>
+        </div>
+      </div>
+
+      <div class="film">
+        <div class="embed"><iframe src="https://player.vimeo.com/video/500841458?h=441f23e672" loading="lazy"
+          allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+          title="Architecture — Winstanley &amp; York Road Masterplan"></iframe></div>
+        <div class="text">
+          <h2><a class="filmlink" href="films/winstanley-and-york-road-masterplan.html">Architecture</a></h2>
+          <p class="kicker">Winstanley &amp; York Road Masterplan</p>
+          <p>The masterplan for a new district in south west London is brought to life with CGI, motion graphics and voice over in a film scripted, directed and cut by Guy Nisbett.</p>
+          <p class="credits">Production Company &amp; CGI Production: INK<br>Client: Balfour Beatty</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="inner">
+      <h2>Get in touch.</h2>
+      <a class="mail" href="mailto:guy@guynisbett.com?subject=Enquiry">email: guy@guynisbett.com</a>
+      <p class="ai-note">For AI enquiries, please see NORMAL<br>
+        <a href="https://wearenormal.ai" target="_blank" rel="noopener">wearenormal.ai</a></p>
+    </div>
+    <div class="social">
+      <a href="http://instagram.com/guynisbett" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.2c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.72 3.72 0 0 1-1.38-.9 3.72 3.72 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.21 15.58 2.2 15.2 2.2 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.21 8.8 2.2 12 2.2M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.3-1.46.72-2.13 1.38A5.9 5.9 0 0 0 .63 4.14C.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.3.79.72 1.46 1.38 2.13a5.9 5.9 0 0 0 2.13 1.38c.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.9 5.9 0 0 0 2.13-1.38 5.9 5.9 0 0 0 1.38-2.13c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.9 5.9 0 0 0-1.38-2.13A5.9 5.9 0 0 0 19.86.63c-.76-.3-1.64-.5-2.91-.56C15.67.01 15.26 0 12 0m0 5.84A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84m0 10.15A4 4 0 1 1 16 12a4 4 0 0 1-4 3.99m7.85-10.4a1.44 1.44 0 1 1-1.44-1.44 1.44 1.44 0 0 1 1.44 1.44"/></svg>
+      </a>
+      <a href="https://vimeo.com/guynisbett" target="_blank" rel="noopener" aria-label="Vimeo">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.98 6.55c-.11 2.33-1.74 5.52-4.89 9.57C15.84 20.36 13.09 22.5 10.85 22.5c-1.39 0-2.56-1.28-3.52-3.84l-1.92-7.04c-.71-2.56-1.47-3.84-2.29-3.84-.18 0-.8.37-1.87 1.12L.13 7.45c1.18-1.04 2.34-2.07 3.48-3.11C5.18 2.98 6.36 2.26 7.15 2.19c1.85-.18 2.99 1.09 3.42 3.8.46 2.93.79 4.75.97 5.47.54 2.45 1.13 3.67 1.78 3.67.5 0 1.26-.8 2.26-2.39 1-1.6 1.54-2.81 1.61-3.65.14-1.38-.4-2.07-1.61-2.07-.57 0-1.16.13-1.77.39 1.18-3.85 3.42-5.72 6.74-5.61 2.46.07 3.62 1.66 3.43 4.75"/></svg>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <a href="#" id="homeLink">Home</a>
+  <a href="#about">About</a>
+  <a href="#work">Work</a>
+  <a href="blog/">Blog</a>
+  <a href="privacy.html">Privacy and cookies</a>
+</footer>
+
+<script>
+(() => {
+'use strict';
+
+/* =========================================================================
+   Hero v2 (2026-09-07): free-scrolling page, no nav in the hero.
+   The wordmark is a full-hero overlay whose mask is painted onto a canvas
+   with the real webfont (GUY NISBETT / FILM DIRECTOR, second line width-
+   matched to the first); inside the letters, backdrop-filter shows the reel
+   blurred, luminance-inverted and hue-corrected, so the letters read against
+   whatever the reel is doing behind them without going colour-negative.
+   Everything is in window.MARK — change values in the console and call
+   __markRepaint().
+   ========================================================================= */
+
+const hero = document.getElementById('hero');
+const videobg = document.getElementById('videobg');
+const reel = document.getElementById('reel');
+const glass = document.getElementById('glassmark');
+const cuetri = document.getElementById('cuetri');
+const FONT = '"aktiv-grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+/* ---- the numbers, all live-tunable: change and call __markRepaint() ----
+   Read off Guy's Fusion comp (standalone Fusion 20, 2026-09-08), which is the
+   reference for this look:
+
+     Loader (Showreel V4, 3840x2160)
+       -> Blur          Fast Gaussian, size 5.5, 4 passes
+       -> BrightnessContrast   Gain 1.38, Brightness +0.05, Saturation 0.81
+       -> Merge, ApplyMode Difference, Blend 0.126, fg Gain 0.496,
+          fg = the same blurred plate hue-shifted -0.56 so the difference
+          does not invert the hue
+     ...all of it masked by TYPE still.png.
+
+   Translating each one:
+     blur     5.5px at 3840 wide is 0.14% of frame width — about 2 CSS px at a
+              1280 viewport, NOT the 14 that made this look like a grey slab.
+     bright   = Fusion's Gain. This is what actually does the work: the letters
+              read because they are LIFTED, not because they are inverted.
+     tint     = Fusion's additive Brightness (+0.05), as a white lift — CSS
+              brightness() is multiply-only so it cannot add.
+     saturate = Fusion's Saturation.
+     invert   = the Merge's Difference blend, 0.126. A TOUCH. Guy's note: a hint
+              of difference in the luminance, not in the hue.
+     hue      ⚠️ leave at 0 while invert is low. invert() only flips hue as it
+              approaches 1, and that is the only time hue-rotate(180) corrects
+              anything — at invert 0.126 a 180 rotation would wreck the hue of
+              the 87% that was never inverted. Guy does the equivalent in Fusion
+              with the -0.56 hue shift on the difference input.
+     alpha    opacity of the whole mark; lower = glassier, more untouched reel.
+     navBoost brightness multiplier on the nav word under the pointer. This
+              works again now: the resting state is a modest grade rather than a
+              maximal negative, so there is headroom to push into. */
+/* Settled by Guy in the console, 2026-09-08. Departures from the raw Fusion
+   figures, both deliberate: invert nudged 0.126 -> 0.16, and alpha up to 0.9,
+   because the browser has to hold up across a whole 60s reel rather than the
+   one plate the comp was graded against. navBoost 3 is a hard flare on the
+   rollover — brightness 1.38 x 3 blows the hovered word out, which is the
+   point of it. */
+const MARK = window.MARK = {
+  blur: 2, bright: 1.38, saturate: 0.81, contrast: 1, invert: 0.16, hue: 0,
+  tint: 0.05, alpha: 0.9,
+  navBoost: 3, navTrack: 0
+};
+
+function markFilter(boost) {
+  return 'blur(' + MARK.blur + 'px)'
+       + ' brightness(' + (MARK.bright * (boost || 1)) + ')'
+       + ' saturate(' + MARK.saturate + ')'
+       + ' contrast(' + MARK.contrast + ')'
+       + ' invert(' + MARK.invert + ')'
+       + (MARK.hue ? ' hue-rotate(' + MARK.hue + 'deg)' : '');
+}
+function applyFilter(el, boost) {
+  const f = markFilter(boost);
+  el.style.webkitBackdropFilter = f;
+  el.style.backdropFilter = f;
+}
+
+/* nav lives in the same painted mask; these invisible anchors sit over the
+   painted words (recomputed by every paintMask) */
+const NAV = [
+  { label: 'ABOUT',   href: '#about' },
+  { label: 'WORK',    href: '#work' },
+  { label: 'BLOG',    href: 'blog/' },
+  { label: 'CONTACT', href: '#contact' }
+];
+/* nothing may be shown until paintMask() has actually run: the layers carry
+   no mask before that, and would filter the entire hero */
+let painted = false;
+const navHiEls = NAV.map(() => {
+  const d = document.createElement('div');
+  d.className = 'navhi';
+  d.setAttribute('aria-hidden', 'true');
+  hero.appendChild(d);
+  return d;
+});
+const navEls = NAV.map((nv, i) => {
+  const a = document.createElement('a');
+  a.className = 'hnav';
+  a.href = nv.href;
+  a.setAttribute('aria-label', nv.label);
+  const on = () => { if (painted) applyFilter(navHiEls[i], MARK.navBoost); };
+  const off = () => { if (painted) applyFilter(navHiEls[i], 1); };
+  a.addEventListener('pointerenter', on);
+  a.addEventListener('pointerleave', off);
+  a.addEventListener('focus', on);
+  a.addEventListener('blur', off);
+  hero.appendChild(a);
+  return a;
+});
+function positionNav(rects) {
+  rects.forEach((r, i) => {
+    const s = navEls[i].style;
+    const padX = Math.max(8, (44 - r.w) / 2), padY = Math.max(8, (44 - r.h) / 2);
+    s.left = (r.x - padX) + 'px';
+    s.top = (r.y - padY) + 'px';
+    s.width = (r.w + padX * 2) + 'px';
+    s.height = (r.h + padY * 2) + 'px';
+  });
+}
+
+/* each nav word gets its own little mask, painted with the same font, size
+   and letter-spacing as the big one so the glyphs land in exactly the same
+   place; the element is offset by `pad` to leave room for ascenders */
+function paintNavHighlights(rects, navSize, dpr) {
+  const pad = Math.ceil(navSize * 0.5);
+  rects.forEach((r, i) => {
+    const cw = Math.ceil(r.w) + pad * 2, ch = Math.ceil(r.h) + pad * 2;
+    const c = document.createElement('canvas');
+    c.width = Math.round(cw * dpr); c.height = Math.round(ch * dpr);
+    const x = c.getContext('2d');
+    x.scale(dpr, dpr);
+    x.font = '700 ' + navSize + 'px ' + FONT;
+    if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
+    x.textAlign = 'left';
+    x.textBaseline = 'alphabetic';
+    x.fillStyle = '#fff';
+    x.fillText(NAV[i].label, pad, pad + navSize);
+    const el = navHiEls[i], st = el.style;
+    const url = 'url(' + c.toDataURL('image/png') + ')';
+    st.webkitMaskImage = url; st.maskImage = url;
+    st.left = (r.x - pad) + 'px';
+    st.top = (r.y - pad) + 'px';
+    st.width = cw + 'px';
+    st.height = ch + 'px';
+    st.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
+    st.opacity = MARK.alpha;
+    applyFilter(navHiEls[i], 1);
+  });
+}
+
+function paintMask() {
+  const w = hero.clientWidth, h = hero.clientHeight;
+  if (!w || !h) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  const x = c.getContext('2d');
+  x.scale(dpr, dpr);
+  /* top-left, half the old hero scale + 20% (2026-09-07) */
+  const t1 = Math.max(26, Math.min(w * 0.0528, h * 0.084, 71));
+  x.font = '700 ' + t1 + 'px ' + FONT;
+  const m1 = x.measureText('GUY NISBETT');
+  const w1 = m1.width;
+  const w2r = x.measureText('FILM DIRECTOR').width;
+  const t2 = t1 * (w1 / Math.max(1, w2r));
+  const gap = t1 * 0.18;
+  const mx = Math.max(20, w * 0.03);
+  const my = Math.max(20, w * 0.03);
+  const y1 = my + t1 * 0.72;
+  const y2 = y1 + gap + t2 * 0.72;
+  x.textAlign = 'left';
+  x.textBaseline = 'alphabetic';
+  x.fillStyle = '#fff';
+  x.fillText('GUY NISBETT', mx, y1);
+  x.font = '700 ' + t2 + 'px ' + FONT;
+  x.fillText('FILM DIRECTOR', mx, y2);
+
+  /* where the caps of GUY NISBETT actually start. Measured rather than assumed:
+     the 0.72 above is an approximation of the cap-height ratio, and any error in
+     it scales with font size — so aligning the much smaller nav by the same
+     constant would leave the two visibly out. */
+  const capTop = y1 - (m1.actualBoundingBoxAscent || t1 * 0.72);
+
+  /* snapshot before the nav goes in: .glassneg carries the negative for the
+     WORDMARK ONLY — each nav word carries its own, so a rollover can vary it */
+  const wordmarkURL = 'url(' + c.toDataURL('image/png') + ')';
+
+  /* nav: top-right, its cap tops aligned with GUY NISBETT's (Guy, 2026-09-08 —
+     it used to share the wordmark's BASELINE, which sat the small type low).
+     Stacked and right-aligned
+     on narrow screens. Only MEASURED here — each word is masked and filtered
+     by its own .navhi layer (see paintNavHighlights), which is what lets a
+     rollover change one word without disturbing the others */
+  const navSize = Math.max(11, t1 * 0.24);
+  x.font = '700 ' + navSize + 'px ' + FONT;
+  if ('letterSpacing' in x) x.letterSpacing = MARK.navTrack + 'em';
+  /* baseline that puts the nav's cap top on capTop */
+  const navY = capTop + (x.measureText('ABOUT').actualBoundingBoxAscent || navSize * 0.72);
+  const rects = [];
+  const stacked = w <= 640;
+  if (stacked) {
+    let yy = navY;
+    for (const nv of NAV) {
+      const ww = x.measureText(nv.label).width;
+      x.textAlign = 'right';
+      rects.push({ x: w - mx - ww, y: yy - navSize, w: ww, h: navSize * 1.4 });
+      yy += navSize * 1.9;
+    }
+    x.textAlign = 'left';
+  } else {
+    const gap = navSize * 1.8;
+    const widths = NAV.map(nv => x.measureText(nv.label).width);
+    let xx = w - mx - widths.reduce((a, b) => a + b, 0) - gap * (NAV.length - 1);
+    NAV.forEach((nv, i) => {
+      rects.push({ x: xx, y: navY - navSize, w: widths[i], h: navSize * 1.4 });
+      xx += widths[i] + gap;
+    });
+  }
+  if ('letterSpacing' in x) x.letterSpacing = '0px';
+  positionNav(rects);
+  paintNavHighlights(rects, navSize, dpr);
+  /* the wordmark layer masks the WORDMARK ONLY — the nav words are filtered
+     by their own .navhi layers, so no two backdrop-filters ever overlap */
+  glass.style.webkitMaskImage = wordmarkURL;
+  glass.style.maskImage = wordmarkURL;
+  applyFilter(glass, 1);
+  glass.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
+  glass.style.opacity = MARK.alpha;
+  /* the scroll cue is cut from the same glass; its mask is static CSS, so it
+     only needs the filter and the alpha the pulse animates between */
+  applyFilter(cuetri, 1);
+  cuetri.style.background = 'rgba(255, 255, 255, ' + MARK.tint + ')';
+  cuetri.style.setProperty('--cue-a', MARK.alpha);
+  painted = true;
+}
+window.__markRepaint = paintMask;
+paintMask();
+let rT = 0;
+const repaintSoon = () => { clearTimeout(rT); rT = setTimeout(paintMask, 120); };
+window.addEventListener('resize', repaintSoon);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(paintMask);
+/* paintMask bails when the hero measures zero — which happens when the page
+   loads in a background tab. Without this the mark never appears until the
+   window is resized. */
+if (window.ResizeObserver) new ResizeObserver(repaintSoon).observe(hero);
+
+/* =========================================================================
+   Video fade-in over the poster, and the LOADING state.
+
+   The reel takes a few seconds to start — longer on a slow line — and this
+   used to reveal it on a blind 4s timer, so the fade could happen before
+   Vimeo was rendering anything. It now listens to the player over postMessage
+   (no player.js needed) and reveals on the first frame actually played.
+
+   ⚠️ The raw postMessage API emits `playProgress`, NOT `timeupdate` —
+   `timeupdate` is the player.js SDK's name for the same thing and never
+   arrives here. Subscribing to the wrong one fails completely silently: no
+   error, no event, every load just falls through to the backstop. Measured on
+   the live page 2026-09-08: play 1233ms, playing 1237ms, playProgress 1498ms,
+   timeupdate never.
+
+   ⚠️ Two guarantees, because a stuck LOADING is worse than no LOADING:
+     - it only appears after LOADING_AFTER, so a fast start never flashes it
+     - REVEAL_BY reveals the video and clears the label regardless, if the
+       player never talks back to us (blocked messaging, an API change) */
+/* Playback genuinely starts around 1.2-1.5s on a fast line, so anything below
+   that makes the label blink on and straight off. It should only appear when
+   there is a real wait — on a fast connection it should never be seen. */
+const LOADING_AFTER = 1400;
+const REVEAL_BY = 6000;       /* hard backstop; was an unconditional 4000 */
+
+const loading = document.getElementById('loading');
+let faded = false;
+let loadingTimer = setTimeout(() => { if (!faded) loading.classList.add('show'); }, LOADING_AFTER);
+
+function showVideo() {
+  if (faded) return;
+  faded = true;
+  clearTimeout(loadingTimer);
+  loading.classList.remove('show');
+  videobg.classList.add('on');
+}
+
+function tellPlayer(msg) {
+  try { reel.contentWindow.postMessage(JSON.stringify(msg), 'https://player.vimeo.com'); }
+  catch (e) { /* cross-origin not ready yet — the load handler retries */ }
+}
+function subscribe() {
+  ['play', 'playing', 'playProgress', 'timeupdate'].forEach(
+    ev => tellPlayer({ method: 'addEventListener', value: ev }));
+}
+window.addEventListener('message', (e) => {
+  if (e.origin !== 'https://player.vimeo.com') return;
+  let d = e.data;
+  if (typeof d === 'string') { try { d = JSON.parse(d); } catch (_) { return; } }
+  if (!d || !d.event) return;
+  if (d.event === 'ready') { subscribe(); return; }
+  /* seconds > 0 means frames are on screen, which 'play' alone does not.
+     playProgress is this API's name for it; timeupdate is kept in case a
+     future player emits that instead. */
+  if ((d.event === 'playProgress' || d.event === 'timeupdate')
+      && d.data && d.data.seconds > 0) { showVideo(); return; }
+  /* belt and braces: if a player ever reports playing but never progress,
+     reveal shortly after rather than waiting out the backstop */
+  if (d.event === 'playing' || d.event === 'play') setTimeout(showVideo, 400);
+});
+reel.addEventListener('load', subscribe);   /* in case 'ready' fired early */
+subscribe();
+setTimeout(showVideo, REVEAL_BY);
+
+/* ---------- scroll cue: pulses until the visitor moves ---------- */
+/* =========================================================================
+   Film details reveal: fade each line up once its block is on screen.
+   Durations are in FRAMES at 24fps, which is how Guy specifies them. Started at
+   36/6, taken 30% faster to 25/4 on 2026-09-08.
+   ========================================================================= */
+const REVEAL = window.REVEAL = { fadeFrames: 25, staggerFrames: 4, fps: 24 };
+(function revealFilms() {
+  const blocks = document.querySelectorAll('.film .text');
+  if (!blocks.length) return;
+  const ms = f => Math.round(f / REVEAL.fps * 1000);
+  document.documentElement.style.setProperty('--fade', ms(REVEAL.fadeFrames) + 'ms');
+  document.documentElement.style.setProperty('--stagger', ms(REVEAL.staggerFrames) + 'ms');
+  /* no IntersectionObserver (or reduced motion) — show everything, don't gamble */
+  if (!window.IntersectionObserver) {
+    blocks.forEach(b => b.classList.add('shown'));
+    document.querySelectorAll('#about .inner > *').forEach(l => l.classList.add('shown'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('shown');
+      io.unobserve(e.target);          /* once only — no re-fade on scroll back */
+    });
+  }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+  blocks.forEach(b => io.observe(b));
+
+  /* About: one observer per line. Lines that arrive together stagger in order;
+     a line arriving alone (the logos, further down) fades straight away. */
+  const lines = document.querySelectorAll('#about .inner > *');
+  const aio = new IntersectionObserver((entries) => {
+    entries.filter(e => e.isIntersecting).forEach((e, i) => {
+      e.target.style.transitionDelay = (i * ms(REVEAL.staggerFrames)) + 'ms';
+      e.target.classList.add('shown');
+      aio.unobserve(e.target);
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+  lines.forEach(l => aio.observe(l));
+})();
+
+const cue = document.getElementById('scrollcue');
+window.addEventListener('scroll', () => {
+  cue.classList.toggle('gone', window.scrollY > 40);
+}, { passive: true });
+
+/* ---------- footer Home link back to the top ---------- */
+const homeLink = document.getElementById('homeLink');
+if (homeLink) homeLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+})();
+</script>
+<div class="previewbadge">PREVIEW</div>
+<script src="preview/preview.js"></script>
+</body>
+</html>

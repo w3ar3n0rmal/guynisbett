@@ -1,0 +1,113 @@
+/* =========================================================================
+   PREVIEW overlay — loaded only by /preview.html, on top of the live
+   homepage CSS. The live site is untouched. If Guy approves, these rules get
+   folded into index.template.html and this folder goes.
+   1  dark ground, bigger type
+   2  films grow as they reach the middle of the screen   (preview.js)
+   3  lines rise out of a mask instead of fading          (preview.js)
+   4  client logos as a slow continuous strip
+   ========================================================================= */
+
+:root {
+  --grey-bright: #0d0d0e;
+  --grey-mid:    #0d0d0e;
+  --ink:         #0d0d0e;
+  --dim:         #f0efec;
+  --soft:        #b4b3af;   /* body copy on the dark ground */
+  --quiet:       #85847f;   /* kickers, credits, labels     */
+  --pad:         clamp(20px, 4vw, 72px);
+}
+html, body { background: var(--ink); }
+
+/* ---------- 1. about: big statement, left-aligned ---------- */
+#about { text-align: left; padding: clamp(80px, 11vw, 200px) 0 clamp(60px, 8vw, 140px); }
+#about .inner { width: auto; margin: 0 var(--pad); }
+#about .skills {
+  font-size: clamp(30px, 4.4vw, 84px); font-weight: 700; line-height: 1.0;
+  letter-spacing: -0.025em; color: var(--dim); max-width: 16em; margin: 0 0 clamp(28px, 3.4vw, 64px);
+}
+#about .statement {
+  font-size: clamp(18px, 1.7vw, 30px); font-weight: 500; line-height: 1.25;
+  letter-spacing: -0.01em; color: var(--dim); max-width: 30em; margin: 0 0 clamp(20px, 2.4vw, 44px);
+}
+#about .bio {
+  font-size: clamp(15px, 1.02vw, 18px); line-height: 1.6; color: var(--soft);
+  max-width: 44em; margin: 0 0 0 auto;
+}
+@media (max-width: 900px) { #about .bio { margin-left: 0; } }
+
+/* ---------- 1 + 2. work: full-width film, title left / details right ---------- */
+#work { padding: 0 var(--pad); }
+.film { display: block; padding: clamp(48px, 7vw, 130px) 0; }
+.film + .film { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+.film .embed {
+  flex: none; width: 100%; margin: 0;
+  transform: scale(var(--s, 1)); border-radius: var(--r, 0px);
+  overflow: hidden; isolation: isolate; will-change: transform;
+}
+.film .text {
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 4vw;
+  align-items: start; margin-top: clamp(22px, 2.6vw, 48px);
+}
+.film .text > * { grid-column: 2; }
+.film .text h2 {
+  grid-column: 1; grid-row: 1 / span 4; margin: 0;
+  font-size: clamp(36px, 5vw, 96px); line-height: 0.95; letter-spacing: -0.03em; color: var(--dim);
+}
+.film .text .kicker {
+  margin: 0.4em 0 1.1em; font-size: 12px; font-weight: 700; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--quiet);
+}
+.film .text p { font-size: clamp(15px, 1.02vw, 18px); line-height: 1.55; color: var(--soft); max-width: 36em; }
+.film .text .credits { font-size: clamp(13px, 0.82vw, 15px); line-height: 1.6; color: var(--quiet); }
+@media (max-width: 900px) {
+  .film .text { display: block; }
+  .film .text h2 { margin-bottom: 0.25em; }
+}
+
+/* ---------- contact + footer on the dark ground ---------- */
+#contact::before { background: rgba(10, 10, 11, 0.62); }
+#contact h2 { font-size: clamp(36px, 5vw, 96px); letter-spacing: -0.03em; line-height: 0.95; }
+footer { border-top: 1px solid rgba(255, 255, 255, 0.07); }
+
+/* ---------- 3. mask rise ---------- */
+/* the live fade is switched off here — nothing is hidden by CSS alone, so if
+   preview.js never runs the text simply shows */
+.js .film .text > *, .js #about .inner > p { opacity: 1 !important; transition: none !important; }
+.rise-pending .film .text, .rise-pending #about .inner > p { visibility: hidden; }
+.rise-line  { display: block; overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
+.rise-inner {
+  display: block; transform: translateY(115%);
+  transition: transform var(--fade, 1040ms) cubic-bezier(0.16, 0.84, 0.24, 1);
+}
+.risen .rise-inner { transform: none; }
+
+/* ---------- 4. logo strip ---------- */
+#about .logostrip {
+  margin: clamp(70px, 9vw, 170px) calc(-1 * var(--pad)) 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.logostrip .track { display: flex; align-items: center; width: max-content; animation: logostrip 90s linear infinite; }
+.logostrip:hover .track { animation-play-state: paused; }
+.logostrip img {
+  display: block; height: auto; flex: none;
+  width: calc(var(--w, 1) * clamp(64px, 6.2vw, 118px));
+  margin: 0 clamp(22px, 2.8vw, 54px); opacity: 0.7; transition: opacity 0.3s ease;
+}
+.logostrip img:hover { opacity: 1; }
+@keyframes logostrip { to { transform: translateX(-50%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .film .embed { transform: none; border-radius: 0; }
+  .logostrip .track { animation: none; flex-wrap: wrap; justify-content: center; width: auto; row-gap: 36px; }
+  .logostrip img[aria-hidden] { display: none; }
+  #about .logostrip { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* so nobody mistakes this for the live homepage */
+.previewbadge {
+  position: fixed; left: 14px; bottom: 14px; z-index: 50; pointer-events: none;
+  font: 700 10px/1 var(--font); letter-spacing: 0.22em; color: #fff;
+  background: rgba(0, 0, 0, 0.55); padding: 8px 10px 7px; border-radius: 3px;
+}
