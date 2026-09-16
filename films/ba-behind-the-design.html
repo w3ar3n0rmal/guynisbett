@@ -43,8 +43,9 @@
   article img { width:min(48vw,100%); max-width:none; height:auto; display:block; margin:2vw auto; }
   .videowrap { position:relative; width:min(48vw,100%); aspect-ratio:16/9; background:#000; margin:2vw auto; }
   .videowrap iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:min(48vw,100%); margin:2vw auto; }
-  .gallery img { width:100%; aspect-ratio:1/1; object-fit:cover; margin:0; }
+  /* photos keep their own aspect ratio — never cropped (Guy, 2026-09-16) */
+  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; align-items:start; width:min(48vw,100%); margin:2vw auto; }
+  .gallery img { width:100%; height:auto; margin:0; }
   @media (max-width:900px) { main.post { width:88%; }
     article img, .videowrap, .gallery { width:100%; } }
 
